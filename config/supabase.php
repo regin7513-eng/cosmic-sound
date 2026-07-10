@@ -3,7 +3,7 @@ define('SUPABASE_URL', getenv('SUPABASE_URL') ?: 'https://ualjdbpzalgnctpachbw.s
 define('SUPABASE_ANON_KEY', getenv('SUPABASE_ANON_KEY') ?: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVhbGpkYnB6YWxnbmN0cGFjaGJ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1ODgwMDQsImV4cCI6MjA5OTE2NDAwNH0.T8M548MyiFZyuzL0DTrN_3uQGEn9MnoaOhJ8Ic8ckEs');
 define('SUPABASE_SERVICE_KEY', getenv('SUPABASE_SERVICE_KEY') ?: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVhbGpkYnB6YWxnbmN0cGFjaGJ3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MzU4ODAwNCwiZXhwIjoyMDk5MTY0MDA0fQ.DfgKVsTkfwYsjnhGtgw1drfu2owxB5ij_TkBqXSqv9w');
 
-function supabaseQuery($table, $method = 'GET', $data = null, $filters = [], $useServiceKey = false) {
+function supabaseQuery($table, $method = 'GET', $data = null, $filters = [], $useServiceKey = false, $userToken = null) {
     $url = SUPABASE_URL . '/rest/v1/' . $table;
     $params = [];
     foreach ($filters as $key => $val) {
@@ -12,11 +12,12 @@ function supabaseQuery($table, $method = 'GET', $data = null, $filters = [], $us
     if ($params) $url .= '?' . implode('&', $params);
 
     $key = $useServiceKey ? SUPABASE_SERVICE_KEY : SUPABASE_ANON_KEY;
+    $authKey = $userToken ? $userToken : $key;
 
     $ch = curl_init();
     $headers = [
         'apikey: ' . $key,
-        'Authorization: Bearer ' . $key,
+        'Authorization: Bearer ' . $authKey,
         'Content-Type: application/json',
         'Prefer: return=representation'
     ];
@@ -124,6 +125,28 @@ function supabaseSignIn($email, $password) {
         CURLOPT_POSTFIELDS => json_encode([
             'email' => $email,
             'password' => $password
+        ]),
+        CURLOPT_HTTPHEADER => [
+            'apikey: ' . SUPABASE_ANON_KEY,
+            'Content-Type: application/json'
+        ]
+    ]);
+    $response = curl_exec($ch);
+    curl_close($ch);
+    return json_decode($response, true);
+}
+
+function supabaseRefreshToken($refreshToken) {
+    $url = SUPABASE_URL . '/auth/v1/token?grant_type=refresh_token';
+    $ch = curl_init();
+    curl_setopt_array($ch, [
+        CURLOPT_URL => $url,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_TIMEOUT => 15,
+        CURLOPT_SSL_VERIFYPEER => false,
+        CURLOPT_POST => true,
+        CURLOPT_POSTFIELDS => json_encode([
+            'refresh_token' => $refreshToken
         ]),
         CURLOPT_HTTPHEADER => [
             'apikey: ' . SUPABASE_ANON_KEY,

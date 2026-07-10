@@ -14,22 +14,21 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'User');
 <body>
     <div class="dashboard">
         <!-- Sidebar -->
-        <nav class="sidebar">
-            <div class="sidebar-logo">
-                <div class="sidebar-logo-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
-                </div>
-                <span class="sidebar-logo-text">Ginz Song</span>
+        <nav class="sidebar" id="sidebar">
+            <div class="sidebar-collapse-btn" onclick="toggleSidebarCollapse()" title="Toggle sidebar">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
             </div>
-
             <div class="sidebar-nav-wrapper">
                 <div class="sidebar-section">
-                    <div class="sidebar-section-title">Discover</div>
+                    <div class="sidebar-section-title" onclick="toggleSidebarSection(this)">
+                        Discover
+                        <svg class="section-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                    </div>
                     <ul class="sidebar-nav">
                         <li>
                             <a href="#" class="nav-link active" data-section="home" onclick="showSection('home', this)">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
-                                <span>Listen Now</span>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+                                <span>Home</span>
                             </a>
                         </li>
                         <li>
@@ -48,7 +47,10 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'User');
                 </div>
 
                 <div class="sidebar-section">
-                    <div class="sidebar-section-title">Library</div>
+                    <div class="sidebar-section-title" onclick="toggleSidebarSection(this)">
+                        Library
+                        <svg class="section-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                    </div>
                     <ul class="sidebar-nav">
                         <li>
                             <a href="#" class="nav-link" data-section="playlists" onclick="showSection('playlists', this)">
@@ -85,6 +87,7 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'User');
                 </button>
             </div>
         </nav>
+        <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
 
         <!-- Main Content -->
         <main class="main-content">
@@ -93,7 +96,7 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'User');
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
                 </button>
                 <div class="header-greeting">
-                    <h1>Listen Now</h1>
+                    <h1>Ginz Song</h1>
                 </div>
                 <div class="search-container">
                     <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -188,7 +191,7 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'User');
             <!-- Section: My Playlists -->
             <div id="section-playlists" class="section">
                 <div class="section-header">
-                    <h2>My Playlists</h2>
+                    <h2 id="playlists-section-title">My Playlists</h2>
                     <button class="create-playlist-btn-inline" onclick="showCreatePlaylistModal()">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                         New Playlist
@@ -227,7 +230,7 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'User');
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
                 </button>
             </div>
-            <div class="player-progress">
+            <div class="player-progress" onclick="seek(event)">
                 <span id="current-time">0:00</span>
                 <div class="progress-bar"><div class="progress-bar-fill"></div></div>
                 <span id="duration">0:00</span>
@@ -238,10 +241,14 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'User');
             <button id="lyrics-btn" class="control-btn" title="Lyrics" onclick="toggleLyrics()">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
             </button>
+            <button class="control-btn" title="Queue" onclick="toggleQueue()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            </button>
             <button id="volume-btn" class="control-btn" title="Volume">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
             </button>
             <input type="range" id="volume-slider" min="0" max="100" value="70" class="volume-slider">
+            
         </div>
     </div>
 
@@ -263,6 +270,108 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'User');
             <div class="lyrics-loading">
                 <div class="loading-spinner"></div>
                 <p>Loading lyrics...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Queue Panel -->
+    <div class="queue-panel" id="queue-panel">
+        <div class="queue-header">
+            <div class="queue-tabs">
+                <button class="queue-tab active" onclick="switchQueueTab(this, 'queue')">Queue</button>
+                <button class="queue-tab" onclick="switchQueueTab(this, 'recent')">Recently played</button>
+            </div>
+            <button class="queue-close" onclick="toggleQueue()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <div class="queue-content" id="queue-content">
+            <div class="queue-section">
+                <h4>Now playing</h4>
+                <div id="queue-now"></div>
+            </div>
+            <div class="queue-section">
+                <h4 id="queue-next-title">Next from: Queue</h4>
+                <div id="queue-next"></div>
+            </div>
+        </div>
+        <div class="queue-content" id="recent-content" style="display:none">
+            <div class="queue-section">
+                <h4>Recently played</h4>
+                <div id="recent-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Now Playing Full View -->
+    <div class="now-playing-overlay" id="now-playing-overlay">
+        <button class="np-collapse-btn" id="np-collapse-btn" onclick="toggleNpCollapse()" title="Collapse panel">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <div class="now-playing-bg" id="now-playing-bg">
+            <div class="now-playing-bg-stars"></div>
+        </div>
+        <div class="now-playing-content" id="np-content-full">
+            <div class="np-empty-state" id="np-empty-state">
+                <svg width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="rgba(255,45,149,0.3)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+                <p>Nothing Playing</p>
+                <span>Pick a song to start listening</span>
+            </div>
+            <div class="np-has-song" id="np-has-song" style="display:none;">
+                <div class="now-playing-art" id="np-art-container">
+                    <img id="np-cover" src="" alt="">
+                </div>
+                <div class="now-playing-info">
+                    <h2 id="np-title">Not Playing</h2>
+                    <p id="np-artist">-</p>
+                </div>
+                <div class="now-playing-fav" id="np-fav-section">
+                    <button class="np-fav-btn" id="np-fav-btn" onclick="toggleNpFav()">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                    </button>
+                    <button class="np-pl-btn" id="np-pl-btn" onclick="openNpPlaylistModal()" title="Add to Playlist">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                    </button>
+                </div>
+                <div class="now-playing-controls">
+                    <div class="np-progress">
+                        <span id="np-current-time">0:00</span>
+                        <div class="progress-bar" onclick="seek(event)"><div class="progress-bar-fill" id="np-progress-fill"></div></div>
+                        <span id="np-duration">0:00</span>
+                    </div>
+                    <div class="np-buttons">
+                        <button class="np-ctrl-btn" id="np-shuffle-btn" onclick="toggleShuffle()">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
+                        </button>
+                        <button class="np-ctrl-btn" onclick="playPrevious()">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+                        </button>
+                        <button class="np-play-btn" id="np-play-btn" onclick="togglePlay()">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" id="np-play-icon"><path d="M8 5v14l11-7z"/></svg>
+                        </button>
+                        <button class="np-ctrl-btn" onclick="playNext()">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+                        </button>
+                        <button class="np-ctrl-btn" id="np-repeat-btn" onclick="toggleRepeat()">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="np-artist-section" id="np-artist-section">
+                    <h3>About the artist</h3>
+                    <div class="np-artist-card">
+                        <img id="np-artist-img" src="" alt="">
+                        <div class="np-artist-info">
+                            <h4 id="np-artist-name">-</h4>
+                            <p class="np-artist-listeners" id="np-artist-listeners"></p>
+                        </div>
+                    </div>
+                    <p class="np-artist-bio" id="np-artist-bio"></p>
+                    <a class="np-artist-more" id="np-artist-link" href="#" target="_blank">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                        View on Spotify
+                    </a>
+                </div>
             </div>
         </div>
     </div>
@@ -353,8 +462,11 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'User');
                         cover_image: f.cover_image, file_path: f.file_path, track_url: f.track_url,
                         duration_text: f.duration_text, source: 'spotify'
                     }));
+                    allSongs = favSongs;
+                    if (typeof accumulateKnown === 'function') accumulateKnown(favSongs);
                     renderGrid(grid, favSongs);
                 } else {
+                    allSongs = [];
                     grid.innerHTML = '<div class="empty-state"><div class="empty-state-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div><h3>No favorites yet</h3><p>Songs you love will appear here</p></div>';
                 }
             } catch (e) {
@@ -363,20 +475,35 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'User');
         }
 
         async function loadUserPlaylists() {
+            currentPlaylistId = null;
+            document.getElementById('playlists-section-title').textContent = 'My Playlists';
             const grid = document.getElementById('user-playlists-grid');
+            grid._songs = null;
             grid.innerHTML = '<div class="empty-state"><div class="loading-spinner"></div><h3 style="margin-top:1rem">Loading playlists...</h3></div>';
             try {
                 const res = await fetch(API_BASE + '/playlists.php', { credentials: 'same-origin' });
                 const data = await res.json();
                 if (data.success && data.data.length > 0) {
                     grid.innerHTML = data.data.map(p => {
-                        return '<div class="song-card playlist-card" onclick="loadUserPlaylistTracks(\'' + p.id + '\', \'' + esc(p.name).replace(/'/g, "\\'") + '\')" style="cursor:pointer">' +
-                            '<div class="song-card-cover">' +
-                                '<div class="playlist-cover-gradient"><svg width="32" height="32" viewBox="0 0 24 24" fill="white"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg></div>' +
+                        var covers = (p.track_covers || []).filter(c => c).slice(0, 4);
+                        var coverHtml;
+                        if (covers.length === 0) {
+                            coverHtml = '<div class="playlist-cover-gradient"><svg width="32" height="32" viewBox="0 0 24 24" fill="white"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg></div>';
+                        } else if (covers.length === 1) {
+                            coverHtml = '<img src="' + covers[0] + '" alt="" style="width:100%;height:100%;object-fit:cover;">';
+                        } else {
+                            coverHtml = '<div class="playlist-collage">' + covers.map(c => '<img src="' + c + '" alt="">').join('') + '</div>';
+                        }
+                        return '<div class="song-card playlist-card">' +
+                            '<div class="song-card-cover" onclick="loadUserPlaylistTracks(\'' + p.id + '\', \'' + esc(p.name).replace(/'/g, "\\'") + '\')" style="cursor:pointer">' +
+                                coverHtml +
                                 '<div class="play-overlay"><div class="play-btn-circle"><svg width="20" height="20" viewBox="0 0 24 24" fill="#000"><path d="M8 5v14l11-7z"/></svg></div></div>' +
                             '</div>' +
-                            '<h4 class="song-card-title">' + esc(p.name) + '</h4>' +
-                            '<p class="song-card-artist">' + esc(p.description || 'Playlist') + '</p>' +
+                            '<h4 class="song-card-title" onclick="loadUserPlaylistTracks(\'' + p.id + '\', \'' + esc(p.name).replace(/'/g, "\\'") + '\')" style="cursor:pointer">' + esc(p.name) + '</h4>' +
+                            '<p class="song-card-artist">' + (p.track_count || 0) + ' songs</p>' +
+                            '<button class="playlist-delete-btn" onclick="event.stopPropagation(); deletePlaylist(\'' + p.id + '\', \'' + esc(p.name).replace(/'/g, "\\'") + '\')" title="Delete playlist">' +
+                                '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>' +
+                            '</button>' +
                         '</div>';
                     }).join('');
                 } else {
@@ -388,6 +515,8 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'User');
         }
 
         async function loadUserPlaylistTracks(playlistId, playlistName) {
+            currentPlaylistId = playlistId;
+            document.getElementById('playlists-section-title').textContent = playlistName;
             const grid = document.getElementById('user-playlists-grid');
             grid.innerHTML = '<div class="empty-state"><div class="loading-spinner"></div><h3 style="margin-top:1rem">Loading ' + esc(playlistName) + '...</h3></div>';
             try {
@@ -397,16 +526,57 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'User');
                     const plSongs = data.tracks.map(t => ({
                         id: t.track_id, title: t.title, artist: t.artist, album: t.album,
                         cover_image: t.cover_image, file_path: t.file_path, track_url: t.track_url,
-                        duration_text: t.duration_text, source: 'spotify'
+                        duration_text: t.duration_text, source: 'spotify', _track_id: t.id
                     }));
                     allSongs = plSongs;
-                    grid.innerHTML = '<div style="margin-bottom:1rem;"><button class="tab-btn" onclick="loadUserPlaylists()" style="font-size:0.8rem;">&larr; Back to Playlists</button> <span style="color:var(--text-secondary);font-size:0.85rem;margin-left:0.5rem;">' + esc(playlistName) + ' &middot; ' + plSongs.length + ' songs</span></div>';
+                    grid.innerHTML = '<div style="margin-bottom:1rem;"><button class="tab-btn" onclick="currentPlaylistId=null; loadUserPlaylists()" style="font-size:0.8rem;">&larr; Back to Playlists</button> <span style="color:var(--text-secondary);font-size:0.85rem;margin-left:0.5rem;">' + esc(playlistName) + ' &middot; ' + plSongs.length + ' songs</span></div>';
                     renderGrid(grid, plSongs);
                 } else {
-                    grid.innerHTML = '<div style="margin-bottom:1rem;"><button class="tab-btn" onclick="loadUserPlaylists()" style="font-size:0.8rem;">&larr; Back to Playlists</button></div><div class="empty-state"><div class="empty-state-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div><h3>No tracks yet</h3><p>Add songs from the Listen Now section</p></div>';
+                    currentPlaylistId = null;
+                    grid.innerHTML = '<div style="margin-bottom:1rem;"><button class="tab-btn" onclick="currentPlaylistId=null; loadUserPlaylists()" style="font-size:0.8rem;">&larr; Back to Playlists</button></div><div class="empty-state"><div class="empty-state-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div><h3>No tracks yet</h3><p>Add songs from the Listen Now section</p></div>';
                 }
             } catch (e) {
+                currentPlaylistId = null;
                 grid.innerHTML = '<div class="empty-state"><div class="empty-state-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div><h3>Could not load playlist</h3></div>';
+            }
+        }
+
+        async function removeFromPlaylist(trackId) {
+            if (!currentPlaylistId) return;
+            try {
+                const res = await fetch(API_BASE + '/playlist_tracks.php?playlist_id=' + currentPlaylistId + '&track_id=' + encodeURIComponent(trackId), {
+                    method: 'DELETE',
+                    credentials: 'same-origin'
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast('Removed from playlist');
+                    var plName = document.querySelector('#user-playlists-grid .tab-btn + span')?.textContent?.split(' · ')[0] || 'Playlist';
+                    loadUserPlaylistTracks(currentPlaylistId, plName);
+                } else {
+                    showToast(data.message || 'Failed to remove');
+                }
+            } catch {
+                showToast('Failed to remove from playlist');
+            }
+        }
+
+        async function deletePlaylist(playlistId, playlistName) {
+            if (!confirm('Delete playlist "' + playlistName + '"?')) return;
+            try {
+                const res = await fetch(API_BASE + '/playlists.php?id=' + playlistId, {
+                    method: 'DELETE',
+                    credentials: 'same-origin'
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast('Playlist deleted');
+                    loadUserPlaylists();
+                } else {
+                    showToast(data.message || 'Failed to delete');
+                }
+            } catch {
+                showToast('Failed to delete playlist');
             }
         }
     </script>

@@ -57,7 +57,7 @@ if ($method === 'POST') {
         'file_path' => $input['file_path'] ?? '',
         'duration_text' => $input['duration_text'] ?? '',
         'position' => $nextPos
-    ], [], true);
+    ], [], false, $user['access_token']);
 
     if (isset($result['error'])) {
         echo json_encode(['success' => false, 'message' => $result['error']]);

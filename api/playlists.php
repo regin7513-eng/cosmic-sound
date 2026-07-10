@@ -43,7 +43,20 @@ if ($method === 'GET') {
             'order' => 'created_at.desc'
         ], true);
 
-        echo json_encode(['success' => true, 'data' => $result['data'] ?? []]);
+        $playlists = $result['data'] ?? [];
+        foreach ($playlists as &$p) {
+            $allTracks = supabaseQuery('playlist_tracks', 'GET', null, [
+                'playlist_id' => 'eq.' . $p['id'],
+                'select' => 'cover_image',
+                'order' => 'position.asc'
+            ], true);
+            $allCovers = array_map(fn($t) => $t['cover_image'] ?? '', $allTracks['data'] ?? []);
+            $p['track_covers'] = array_slice($allCovers, 0, 4);
+            $p['track_count'] = count($allCovers);
+        }
+        unset($p);
+
+        echo json_encode(['success' => true, 'data' => $playlists]);
     }
     exit();
 }
