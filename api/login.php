@@ -26,7 +26,7 @@ if ($result === null || $result === false) {
     exit();
 }
 
-if (isset($result['error'])) {
+if (isset($result['error']) || isset($result['error_code'])) {
     echo json_encode(['success' => false, 'message' => 'Invalid email or password']);
     exit();
 }

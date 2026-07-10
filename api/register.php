@@ -27,8 +27,8 @@ if (strlen($password) < 6) {
 
 $result = supabaseAdminCreateUser($email, $password, $username);
 
-if (isset($result['error'])) {
-    $msg = $result['error'];
+if (isset($result['error']) || isset($result['msg'])) {
+    $msg = $result['error'] ?? $result['msg'] ?? 'Unknown error';
     if (strpos($msg, 'already') !== false) {
         $msg = 'Email already registered';
     }
