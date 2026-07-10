@@ -8,7 +8,7 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'User');
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cosmic Sound</title>
+    <title>Ginz Song</title>
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
@@ -19,7 +19,7 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'User');
                 <div class="sidebar-logo-icon">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
                 </div>
-                <span class="sidebar-logo-text">Cosmic Sound</span>
+                <span class="sidebar-logo-text">Ginz Song</span>
             </div>
 
             <div class="sidebar-nav-wrapper">
@@ -38,6 +38,12 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'User');
                                 <span>Favorites</span>
                             </a>
                         </li>
+                        <li>
+                            <a href="#" class="nav-link" data-section="recent" onclick="showSection('recent', this)">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                <span>Recently Played</span>
+                            </a>
+                        </li>
                     </ul>
                 </div>
 
@@ -48,6 +54,18 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'User');
                             <a href="#" class="nav-link" data-section="playlists" onclick="showSection('playlists', this)">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
                                 <span>My Playlists</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="nav-link" data-section="artists" onclick="showSection('artists', this)">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                <span>Artists</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="nav-link" data-section="albums" onclick="showSection('albums', this)">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                                <span>Albums</span>
                             </a>
                         </li>
                     </ul>
@@ -71,12 +89,14 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'User');
         <!-- Main Content -->
         <main class="main-content">
             <header class="main-header">
+                <button class="mobile-menu-btn" onclick="toggleSidebar()">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+                </button>
                 <div class="header-greeting">
                     <h1>Listen Now</h1>
-                    <p class="header-subtitle">Discover music that matches your vibe</p>
                 </div>
                 <div class="search-container">
-                    <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                     <form onsubmit="handleSearch(event)">
                         <input type="text" id="search-input" class="search-input" placeholder="What do you want to listen to?" oninput="onSearchInput(this.value)">
                     </form>
@@ -86,11 +106,46 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'User');
             <!-- Section: Listen Now -->
             <div id="section-home" class="section active">
                 <section class="playlist-tabs">
-                    <button class="tab-btn active" onclick="loadPlaylistTab(this, 'trending')">Trending</button>
-                    <button class="tab-btn" onclick="loadPlaylistTab(this, 'chill')">Chill</button>
-                    <button class="tab-btn" onclick="loadPlaylistTab(this, 'energy')">Energy</button>
-                    <button class="tab-btn" onclick="loadPlaylistTab(this, 'romance')">Romance</button>
-                    <button class="tab-btn" onclick="loadPlaylistTab(this, 'focus')">Focus</button>
+                    <button class="tab-btn active" onclick="loadPlaylistTab(this, 'trending')">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                        Trending
+                    </button>
+                    <button class="tab-btn" onclick="loadPlaylistTab(this, 'chill')">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+                        Chill
+                    </button>
+                    <button class="tab-btn" onclick="loadPlaylistTab(this, 'energy')">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                        Energy
+                    </button>
+                    <button class="tab-btn" onclick="loadPlaylistTab(this, 'romance')">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                        Romance
+                    </button>
+                    <button class="tab-btn" onclick="loadPlaylistTab(this, 'focus')">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                        Focus
+                    </button>
+                    <button class="tab-btn" onclick="loadPlaylistTab(this, 'party')">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+                        Party
+                    </button>
+                    <button class="tab-btn" onclick="loadPlaylistTab(this, 'sad')">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M16 16s-1.5-2-4-2-4 2-4 2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+                        Sad
+                    </button>
+                    <button class="tab-btn" onclick="loadPlaylistTab(this, 'indie')">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+                        Indie
+                    </button>
+                    <button class="tab-btn" onclick="loadPlaylistTab(this, 'hiphop')">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+                        Hip Hop
+                    </button>
+                    <button class="tab-btn" onclick="loadPlaylistTab(this, 'karaoke')">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                        Karaoke
+                    </button>
                 </section>
                 <div class="section-header">
                     <h2 id="playlist-title">Trending</h2>
@@ -104,6 +159,30 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'User');
                     <h2>Favorites</h2>
                 </div>
                 <div class="song-grid" id="favorites-grid"></div>
+            </div>
+
+            <!-- Section: Recently Played -->
+            <div id="section-recent" class="section">
+                <div class="section-header">
+                    <h2>Recently Played</h2>
+                </div>
+                <div class="song-grid" id="recent-grid"></div>
+            </div>
+
+            <!-- Section: Artists -->
+            <div id="section-artists" class="section">
+                <div class="section-header">
+                    <h2>Artists</h2>
+                </div>
+                <div class="artist-grid" id="artists-grid"></div>
+            </div>
+
+            <!-- Section: Albums -->
+            <div id="section-albums" class="section">
+                <div class="section-header">
+                    <h2>Albums</h2>
+                </div>
+                <div class="song-grid" id="albums-grid"></div>
             </div>
 
             <!-- Section: My Playlists -->
@@ -257,6 +336,9 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'User');
             if (el) el.classList.add('active');
             if (name === 'favorites') loadFavorites();
             if (name === 'playlists') loadUserPlaylists();
+            if (name === 'recent') loadRecent();
+            if (name === 'artists') loadArtists();
+            if (name === 'albums') loadAlbums();
         }
 
         async function loadFavorites() {

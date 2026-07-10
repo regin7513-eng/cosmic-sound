@@ -10,6 +10,7 @@ let isRepeating = false;
 let favoriteIds = new Set();
 let userPlaylists = [];
 let contextSong = null;
+let urlCache = {};
 
 document.addEventListener('DOMContentLoaded', () => {
     const playerBar = document.getElementById('player-bar');
@@ -24,6 +25,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (menu && !menu.contains(e.target) && !e.target.closest('.song-card-menu') && !e.target.closest('.song-action-btn')) {
             menu.classList.remove('show');
         }
+        const sidebar = document.querySelector('.sidebar');
+        const menuBtn = document.querySelector('.mobile-menu-btn');
+        if (sidebar && sidebar.classList.contains('open') && !sidebar.contains(e.target) && !menuBtn?.contains(e.target)) {
+            sidebar.classList.remove('open');
+            document.querySelector('.sidebar-overlay')?.remove();
+        }
     });
 
     document.querySelectorAll('.modal-overlay').forEach(modal => {
@@ -34,6 +41,20 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 });
+
+function toggleSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    if (!sidebar) return;
+    sidebar.classList.toggle('open');
+    if (sidebar.classList.contains('open')) {
+        const overlay = document.createElement('div');
+        overlay.className = 'sidebar-overlay';
+        overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:99;';
+        document.body.appendChild(overlay);
+    } else {
+        document.querySelector('.sidebar-overlay')?.remove();
+    }
+}
 
 function initPlayer() {
     document.getElementById('play-btn')?.addEventListener('click', togglePlay);
@@ -48,8 +69,8 @@ function initPlayer() {
     audio.volume = 0.7;
     audio.addEventListener('timeupdate', () => { updateProgress(); updateLyricsHighlight(); });
     audio.addEventListener('loadedmetadata', updateDuration);
-    audio.addEventListener('play', () => { isPlaying = true; updatePlayButton(); });
-    audio.addEventListener('pause', () => { isPlaying = false; updatePlayButton(); });
+    audio.addEventListener('play', () => { isPlaying = true; updatePlayButton(); refreshGrid(); });
+    audio.addEventListener('pause', () => { isPlaying = false; updatePlayButton(); refreshGrid(); });
     audio.addEventListener('ended', handleSongEnd);
     audio.addEventListener('error', () => showToast('Unable to play this track'));
 }
@@ -245,17 +266,22 @@ async function loadPlaylist(id) {
     grid.innerHTML = '<div class="empty-state"><div class="loading-spinner"></div><h3 style="margin-top:1rem">Loading...</h3></div>';
 
     const playlists = {
-        'trending': { name: 'Trending', q: 'bollywood hit songs 2025' },
-        'chill': { name: 'Chill', q: 'lofi chill hindi' },
-        'energy': { name: 'Energy', q: 'party bollywood dance' },
-        'romance': { name: 'Romance', q: 'romantic hindi love songs' },
-        'focus': { name: 'Focus', q: 'instrumental study music' }
+        'trending': { name: 'Trending', q: 'top hits 2025' },
+        'chill': { name: 'Chill', q: 'lofi chill beats relaxing' },
+        'energy': { name: 'Energy', q: 'workout motivation pump up' },
+        'romance': { name: 'Romance', q: 'love songs romantic' },
+        'focus': { name: 'Focus', q: 'study music instrumental concentration' },
+        'party': { name: 'Party', q: 'party dance hits club' },
+        'sad': { name: 'Sad', q: 'sad emotional heartbreak' },
+        'indie': { name: 'Indie', q: 'indie alternative chill' },
+        'hiphop': { name: 'Hip Hop', q: 'hip hop rap best' },
+        'karaoke': { name: 'Karaoke', q: 'karaoke sing along popular' }
     };
 
     const pl = playlists[id] || playlists['trending'];
 
     try {
-        const res = await fetch(API_BASE + '/jiosaavn.php?action=search&q=' + encodeURIComponent(pl.q) + '&limit=18');
+        const res = await fetch(API_BASE + '/sankavollerei.php?action=search&q=' + encodeURIComponent(pl.q) + '&limit=18');
         const data = await res.json();
 
         if (!data.success || !data.data || data.data.length === 0) {
@@ -277,7 +303,7 @@ async function searchMusic(query) {
     grid.innerHTML = '<div class="empty-state"><div class="loading-spinner"></div><h3 style="margin-top:1rem">Searching...</h3></div>';
 
     try {
-        const res = await fetch(API_BASE + '/jiosaavn.php?action=search&q=' + encodeURIComponent(query) + '&limit=18');
+        const res = await fetch(API_BASE + '/sankavollerei.php?action=search&q=' + encodeURIComponent(query) + '&limit=18');
         const data = await res.json();
 
         if (!data.success || !data.data || data.data.length === 0) {
@@ -290,6 +316,107 @@ async function searchMusic(query) {
         renderGrid(grid, allSongs);
     } catch (e) {
         grid.innerHTML = emptyState('Search failed', esc(e.message));
+    }
+}
+
+let recentSongs = [];
+
+function addToRecent(song) {
+    recentSongs = recentSongs.filter(s => s.id !== song.id);
+    recentSongs.unshift(song);
+    if (recentSongs.length > 20) recentSongs = recentSongs.slice(0, 20);
+    try { localStorage.setItem('recentSongs', JSON.stringify(recentSongs)); } catch {}
+}
+
+function loadRecentFromStorage() {
+    try {
+        var stored = localStorage.getItem('recentSongs');
+        if (stored) recentSongs = JSON.parse(stored);
+    } catch {}
+}
+
+async function loadRecent() {
+    const grid = document.getElementById('recent-grid');
+    if (!grid) return;
+    loadRecentFromStorage();
+    if (recentSongs.length > 0) {
+        allSongs = recentSongs;
+        renderGrid(grid, recentSongs);
+    } else {
+        grid.innerHTML = emptyState('No recently played songs', 'Songs you play will appear here');
+    }
+}
+
+async function loadArtists() {
+    const grid = document.getElementById('artists-grid');
+    if (!grid) return;
+    grid.innerHTML = '<div class="empty-state"><div class="loading-spinner"></div><h3 style="margin-top:1rem">Loading artists...</h3></div>';
+
+    try {
+        const res = await fetch(API_BASE + '/sankavollerei.php?action=search&q=popular artists 2025&limit=18');
+        const data = await res.json();
+
+        if (!data.success || !data.data || data.data.length === 0) {
+            grid.innerHTML = emptyState('No artists found', '');
+            return;
+        }
+
+        var artistMap = {};
+        data.data.forEach(function(song) {
+            if (!artistMap[song.artist]) {
+                artistMap[song.artist] = song;
+            }
+        });
+        var artists = Object.values(artistMap);
+
+        grid.innerHTML = artists.map(function(song) {
+            return '<div class="artist-card" onclick="searchMusic(\'' + esc(song.artist).replace(/'/g, "\\'") + '\')">' +
+                '<div class="artist-avatar">' +
+                    '<img src="' + esc(song.cover_image) + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">' +
+                '</div>' +
+                '<h4 class="artist-name">' + esc(song.artist) + '</h4>' +
+                '<p class="artist-label">Artist</p>' +
+            '</div>';
+        }).join('');
+    } catch (e) {
+        grid.innerHTML = emptyState('Could not load artists', '');
+    }
+}
+
+async function loadAlbums() {
+    const grid = document.getElementById('albums-grid');
+    if (!grid) return;
+    grid.innerHTML = '<div class="empty-state"><div class="loading-spinner"></div><h3 style="margin-top:1rem">Loading albums...</h3></div>';
+
+    try {
+        const res = await fetch(API_BASE + '/sankavollerei.php?action=search&q=best albums 2025&limit=18');
+        const data = await res.json();
+
+        if (!data.success || !data.data || data.data.length === 0) {
+            grid.innerHTML = emptyState('No albums found', '');
+            return;
+        }
+
+        var albumMap = {};
+        data.data.forEach(function(song) {
+            if (song.album && !albumMap[song.album]) {
+                albumMap[song.album] = song;
+            }
+        });
+        var albums = Object.values(albumMap);
+
+        grid.innerHTML = albums.map(function(song) {
+            return '<div class="song-card" onclick="searchMusic(\'' + esc(song.album).replace(/'/g, "\\'") + '\')">' +
+                '<div class="song-card-cover">' +
+                    '<img src="' + esc(song.cover_image) + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">' +
+                    '<div class="play-overlay"><div class="play-btn-circle"><svg width="20" height="20" viewBox="0 0 24 24" fill="#000"><path d="M8 5v14l11-7z"/></svg></div></div>' +
+                '</div>' +
+                '<h4 class="song-card-title">' + esc(song.album) + '</h4>' +
+                '<p class="song-card-artist">' + esc(song.artist) + '</p>' +
+            '</div>';
+        }).join('');
+    } catch (e) {
+        grid.innerHTML = emptyState('Could not load albums', '');
     }
 }
 
@@ -309,7 +436,8 @@ function renderGrid(grid, songList) {
         var playIcon = (isActive && isPlaying)
             ? '<svg width="20" height="20" viewBox="0 0 24 24" fill="#000"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>'
             : '<svg width="20" height="20" viewBox="0 0 24 24" fill="#000"><path d="M8 5v14l11-7z"/></svg>';
-        return '<div class="song-card' + (isActive ? ' active' : '') + '" data-index="' + i + '" onclick="playSong(' + i + ')" oncontextmenu="showContextMenu(event, allSongs[' + i + '])">' +
+        var cardClick = isActive ? 'togglePlay()' : 'playSong(' + i + ')';
+        return '<div class="song-card' + (isActive ? ' active' : '') + '" data-index="' + i + '" onclick="' + cardClick + '" oncontextmenu="showContextMenu(event, allSongs[' + i + '])">' +
             '<div class="song-card-cover">' +
                 '<img src="' + esc(song.cover_image) + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">' +
                 (isActive && isPlaying ? '<div class="now-playing-bars" style="position:absolute;bottom:8px;left:8px;z-index:3;"><span></span><span></span><span></span></div>' : '') +
@@ -329,29 +457,57 @@ function renderGrid(grid, songList) {
     }).join('');
 }
 
-function playSong(index) {
+async function playSong(index) {
     if (index < 0 || index >= allSongs.length) return;
     currentIndex = index;
     currentSong = allSongs[index];
 
-    if (!currentSong.file_path) {
+    if (!currentSong.track_url) {
         showToast('This track is not available');
         return;
     }
 
-    audio.src = currentSong.file_path;
-    audio.load();
-    audio.play().catch(function() { showToast('Unable to play this track'); });
-    isPlaying = true;
     updatePlayerUI();
     updatePlayButton();
+    refreshGrid();
+    showToast('Loading...');
+
+    try {
+        let streamUrl = urlCache[currentSong.track_url];
+
+        if (!streamUrl) {
+            const res = await fetch(API_BASE + '/sankavollerei.php?action=download&url=' + encodeURIComponent(currentSong.track_url));
+            const data = await res.json();
+
+            if (!data.success || !data.download_url) {
+                showToast('Unable to load stream');
+                return;
+            }
+
+            streamUrl = data.download_url;
+            urlCache[currentSong.track_url] = streamUrl;
+        }
+
+        audio.src = streamUrl;
+        audio.load();
+        audio.play().then(() => {
+            addToRecent(currentSong);
+        }).catch(() => showToast('Unable to play this track'));
+    } catch (e) {
+        showToast('Failed to load stream');
+    }
 }
 
 function togglePlay() {
     if (!currentSong && allSongs.length > 0) { playSong(0); return; }
     if (!currentSong) return;
-    if (isPlaying) audio.pause();
-    else audio.play().catch(function() {});
+    if (isPlaying) {
+        audio.pause();
+    } else {
+        audio.play().catch(function() {});
+    }
+    updatePlayButton();
+    refreshGrid();
 }
 
 function playPrevious() {
@@ -442,12 +598,7 @@ function updatePlayerUI() {
     document.getElementById('player-cover-img').src = currentSong.cover_image || '';
     document.getElementById('player-title').textContent = currentSong.title;
     document.getElementById('player-artist').textContent = currentSong.artist;
-    document.title = currentSong.title + ' - ' + currentSong.artist + ' | Cosmic Sound';
-
-    var homeGrid = document.querySelector('#section-home .song-grid');
-    if (homeGrid && allSongs.length > 0) {
-        renderGrid(homeGrid, allSongs);
-    }
+    document.title = currentSong.title + ' - ' + currentSong.artist + ' | Ginz Song';
 }
 
 function updatePlayButton() {
@@ -456,6 +607,13 @@ function updatePlayButton() {
     btn.innerHTML = isPlaying
         ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="#000"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>'
         : '<svg width="18" height="18" viewBox="0 0 24 24" fill="#000"><path d="M8 5v14l11-7z"/></svg>';
+}
+
+function refreshGrid() {
+    var homeGrid = document.querySelector('#section-home .song-grid');
+    if (homeGrid && allSongs.length > 0) {
+        renderGrid(homeGrid, allSongs);
+    }
 }
 
 function fmt(s) {

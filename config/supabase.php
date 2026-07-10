@@ -1,7 +1,7 @@
 <?php
-define('SUPABASE_URL', 'https://ualjdbpzalgnctpachbw.supabase.co');
-define('SUPABASE_ANON_KEY', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVhbGpkYnB6YWxnbmN0cGFjaGJ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1ODgwMDQsImV4cCI6MjA5OTE2NDAwNH0.T8M548MyiFZyuzL0DTrN_3uQGEn9MnoaOhJ8Ic8ckEs');
-define('SUPABASE_SERVICE_KEY', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVhbGpkYnB6YWxnbmN0cGFjaGJ3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MzU4ODAwNCwiZXhwIjoyMDk5MTY0MDA0fQ.DfgKVsTkfwYsjnhGtgw1drfu2owxB5ij_TkBqXSqv9w');
+define('SUPABASE_URL', getenv('SUPABASE_URL') ?: 'https://ualjdbpzalgnctpachbw.supabase.co');
+define('SUPABASE_ANON_KEY', getenv('SUPABASE_ANON_KEY') ?: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVhbGpkYnB6YWxnbmN0cGFjaGJ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1ODgwMDQsImV4cCI6MjA5OTE2NDAwNH0.T8M548MyiFZyuzL0DTrN_3uQGEn9MnoaOhJ8Ic8ckEs');
+define('SUPABASE_SERVICE_KEY', getenv('SUPABASE_SERVICE_KEY') ?: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVhbGpkYnB6YWxnbmN0cGFjaGJ3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MzU4ODAwNCwiZXhwIjoyMDk5MTY0MDA0fQ.DfgKVsTkfwYsjnhGtgw1drfu2owxB5ij_TkBqXSqv9w');
 
 function supabaseQuery($table, $method = 'GET', $data = null, $filters = [], $useServiceKey = false) {
     $url = SUPABASE_URL . '/rest/v1/' . $table;
