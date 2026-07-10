@@ -103,6 +103,19 @@ function toggleSidebar() {
     if (overlay) overlay.classList.toggle('show', sidebar.classList.contains('open'));
 }
 
+function mobileNav(section, btn) {
+    document.querySelectorAll('.mobile-nav-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    if (section === 'search') {
+        document.getElementById('search-input')?.focus();
+        return;
+    }
+    var navLink = document.querySelector('.nav-link[data-section="' + section + '"]');
+    if (navLink) {
+        showSection(section, navLink);
+    }
+}
+
 function toggleSidebarSection(titleEl) {
     titleEl.closest('.sidebar-section').classList.toggle('collapsed');
 }
