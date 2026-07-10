@@ -21,6 +21,11 @@ if (empty($email) || empty($password)) {
 
 $result = supabaseSignIn($email, $password);
 
+if ($result === null || $result === false) {
+    echo json_encode(['success' => false, 'message' => 'Connection failed']);
+    exit();
+}
+
 if (isset($result['error'])) {
     echo json_encode(['success' => false, 'message' => 'Invalid email or password']);
     exit();
