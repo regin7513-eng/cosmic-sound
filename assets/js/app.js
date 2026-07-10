@@ -1,4 +1,6 @@
-const API_BASE = window.location.origin + '/api';
+const API_BASE = window.location.pathname.includes('/cosmic-sound')
+    ? window.location.origin + '/cosmic-sound/api'
+    : window.location.origin + '/api';
 
 let currentSong = null;
 let isPlaying = false;
