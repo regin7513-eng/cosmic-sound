@@ -1,4 +1,4 @@
-const API_BASE = window.location.origin + '/cosmic-sound/api';
+const API_BASE = window.location.origin + '/api';
 
 let currentSong = null;
 let isPlaying = false;
