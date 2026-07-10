@@ -1,5 +1,4 @@
-<?php
-session_start();
+<?php require_once __DIR__ . '/config/session.php';
 if (!isset($_SESSION['user_id'])) { header('Location: login.php'); exit(); }
 $username = htmlspecialchars($_SESSION['username'] ?? 'User');
 ?>

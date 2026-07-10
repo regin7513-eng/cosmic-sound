@@ -1,0 +1,11 @@
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    $isSecure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || (!empty($_SERVER['SERVER_PORT']) && (int)$_SERVER['SERVER_PORT'] === 443);
+    ini_set('session.cookie_samesite', 'Lax');
+    ini_set('session.cookie_httponly', '1');
+    if ($isSecure) {
+        ini_set('session.cookie_secure', '1');
+    }
+    ini_set('session.use_strict_mode', '1');
+    session_start();
+}
