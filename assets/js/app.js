@@ -1129,7 +1129,7 @@ function refreshGrid() {
 var refreshGridTimer;
 function refreshGridNow() {
     document.querySelectorAll('.song-grid').forEach(function(grid) {
-        if (grid.id === 'user-playlists-grid') return;
+        if (grid.id === 'user-playlists-grid' && !grid._songs) return;
         if (grid._songs && grid._songs.length > 0) {
             if (grid._renderType === 'tracklist') {
                 renderTrackList(grid, grid._songs);
