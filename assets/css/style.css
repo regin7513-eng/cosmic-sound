@@ -430,7 +430,7 @@ a:hover { text-decoration: underline; }
 .mobile-header-left,
 .mobile-header-right { display: none; }
 .header-avatar { display: none; }
-.user-menu-dropdown { display: none !important; }
+.user-menu-dropdown { display: none; }
 .mobile-home-extras,
 .mobile-library-extras { display: none; }
 
@@ -1590,6 +1590,10 @@ a:hover { text-decoration: underline; }
         font-size: 0.75rem;
         font-weight: 700;
         flex-shrink: 0;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+        position: relative;
+        z-index: 201;
     }
 
     .mobile-header-right {
@@ -1621,14 +1625,14 @@ a:hover { text-decoration: underline; }
     .user-menu-dropdown {
         display: none;
         position: absolute;
-        top: 50px;
-        left: 0.75rem;
+        top: 40px;
+        left: 0;
         background: #1a1030;
         border: 1px solid var(--border);
         border-radius: 12px;
         padding: 0.5rem 0;
-        min-width: 200px;
-        z-index: 200;
+        min-width: 220px;
+        z-index: 300;
         box-shadow: 0 8px 32px rgba(0,0,0,0.6);
     }
     .user-menu-dropdown.active { display: block; }

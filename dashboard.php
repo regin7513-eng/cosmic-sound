@@ -108,20 +108,20 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'User');
             <header class="main-header">
                 <div class="mobile-header-left">
                     <div class="header-avatar" onclick="toggleUserMenu()" id="header-avatar"><?php echo strtoupper(substr($username, 0, 1)); ?></div>
+                    <div class="user-menu-dropdown" id="user-menu-dropdown">
+                        <div class="user-menu-email"><?php echo htmlspecialchars($_SESSION['email'] ?? ''); ?></div>
+                        <button class="user-menu-item" onclick="window.location.href='login.php'">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                            Add Account
+                        </button>
+                        <button class="user-menu-item user-menu-logout" onclick="handleLogout()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                            Logout
+                        </button>
+                    </div>
                     <div class="header-greeting">
                         <h1>Ginz Song</h1>
                     </div>
-                </div>
-                <div class="user-menu-dropdown" id="user-menu-dropdown">
-                    <div class="user-menu-email"><?php echo htmlspecialchars($_SESSION['email'] ?? ''); ?></div>
-                    <button class="user-menu-item" onclick="window.location.href='login.php'">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
-                        Add Account
-                    </button>
-                    <button class="user-menu-item user-menu-logout" onclick="handleLogout()">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-                        Logout
-                    </button>
                 </div>
                 <div class="search-container">
                     <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
