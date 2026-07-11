@@ -203,7 +203,16 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'User');
 
     <!-- Player Bar -->
     <div class="player-bar" id="player-bar">
-        <div class="player-info">
+        <div class="player-info" onclick="openNpMobile()" style="cursor:pointer;">
+            <img id="player-cover-img" src="" alt="">
+            <div class="player-info-text">
+                <h4 id="player-title">Not Playing</h4>
+                <p id="player-artist">-</p>
+            </div>
+        </div>
+        <button class="np-expand-btn" onclick="openNpMobile()" title="Now Playing">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+        </button>
             <img id="player-cover-img" src="" alt="">
             <div class="player-info-text">
                 <h4 id="player-title">Not Playing</h4>
@@ -326,6 +335,9 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'User');
     <div class="now-playing-overlay" id="now-playing-overlay">
         <button class="np-collapse-btn" id="np-collapse-btn" onclick="toggleNpCollapse()" title="Collapse panel">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <button class="np-close-btn" id="np-close-btn" onclick="closeNpMobile()" title="Close">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
         </button>
         <div class="now-playing-bg" id="now-playing-bg">
             <div class="now-playing-bg-stars"></div>

@@ -1208,22 +1208,41 @@ function toggleNowPlaying() {
     if (isFs) updateNowPlaying();
 }
 
+function isMobile() {
+    return window.innerWidth <= 768;
+}
+
 function toggleNpCollapse() {
     var np = document.getElementById('now-playing-overlay');
     var main = document.querySelector('.main-content');
     if (!np) return;
-    np.classList.toggle('np-collapsed');
-    if (main) main.classList.toggle('np-collapsed', np.classList.contains('np-collapsed'));
-    localStorage.setItem('np_collapsed', np.classList.contains('np-collapsed') ? '1' : '0');
+    if (isMobile()) {
+        np.classList.toggle('np-mobile-active');
+    } else {
+        np.classList.toggle('np-collapsed');
+        if (main) main.classList.toggle('np-collapsed', np.classList.contains('np-collapsed'));
+        localStorage.setItem('np_collapsed', np.classList.contains('np-collapsed') ? '1' : '0');
+    }
 }
 
 function restoreNpState() {
+    if (isMobile()) return;
     if (localStorage.getItem('np_collapsed') === '1') {
         var np = document.getElementById('now-playing-overlay');
         var main = document.querySelector('.main-content');
         if (np) np.classList.add('np-collapsed');
         if (main) main.classList.add('np-collapsed');
     }
+}
+
+function openNpMobile() {
+    var np = document.getElementById('now-playing-overlay');
+    if (np && isMobile()) np.classList.add('np-mobile-active');
+}
+
+function closeNpMobile() {
+    var np = document.getElementById('now-playing-overlay');
+    if (np && isMobile()) np.classList.remove('np-mobile-active');
 }
 
 function updateNowPlaying() {
