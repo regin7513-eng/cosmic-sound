@@ -3,6 +3,22 @@ require_once __DIR__ . '/../config/session.php';
 
 function requireAuth() {
     if (!isset($_SESSION['user_id']) || !isset($_SESSION['access_token'])) {
+        if (!empty($_COOKIE['gs_refresh_token'])) {
+            $refreshResult = supabaseRefreshToken($_COOKIE['gs_refresh_token']);
+            if (isset($refreshResult['access_token'])) {
+                $_SESSION['user_id'] = $refreshResult['user']['id'] ?? '';
+                $_SESSION['email'] = $refreshResult['user']['email'] ?? '';
+                $_SESSION['username'] = $refreshResult['user']['user_metadata']['username'] ?? '';
+                $_SESSION['access_token'] = $refreshResult['access_token'];
+                $_SESSION['refresh_token'] = $refreshResult['refresh_token'] ?? $_COOKIE['gs_refresh_token'];
+                return [
+                    'user_id' => $_SESSION['user_id'],
+                    'email' => $_SESSION['email'],
+                    'username' => $_SESSION['username'],
+                    'access_token' => $_SESSION['access_token']
+                ];
+            }
+        }
         header('Content-Type: application/json');
         http_response_code(401);
         echo json_encode(['success' => false, 'message' => 'Unauthorized']);

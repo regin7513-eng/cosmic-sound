@@ -41,6 +41,17 @@ if (isset($result['access_token'])) {
     $_SESSION['access_token'] = $result['access_token'];
     $_SESSION['refresh_token'] = $result['refresh_token'] ?? '';
 
+    if (!empty($result['refresh_token'])) {
+        $secure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off');
+        setcookie('gs_refresh_token', $result['refresh_token'], [
+            'expires' => time() + 604800,
+            'path' => '/',
+            'httponly' => true,
+            'samesite' => 'Lax',
+            'secure' => $secure
+        ]);
+    }
+
     $profile = supabaseQuery('user_profiles', 'GET', null, ['id' => 'eq.' . $userId, 'select' => '*'], true);
     if (isset($profile['data'][0]['username'])) {
         $_SESSION['username'] = $profile['data'][0]['username'];

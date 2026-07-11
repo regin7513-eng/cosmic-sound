@@ -93,6 +93,29 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
+
+    document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState === 'visible') {
+            fetch(API_BASE + '/session_refresh.php', { method: 'POST', credentials: 'same-origin' })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (!data.success && data.expired) {
+                        if (currentSong && isPlaying) audio.pause();
+                        window.location.href = '/cosmic-sound/login.php';
+                    } else if (data.success) {
+                        loadFavoriteIds();
+                        refreshGrid();
+                    }
+                })
+                .catch(function() {});
+        }
+    });
+
+    setInterval(function() {
+        if (document.visibilityState === 'visible') {
+            fetch(API_BASE + '/session_refresh.php', { method: 'POST', credentials: 'same-origin' }).catch(function() {});
+        }
+    }, 1800000);
 });
 
 function toggleSidebar() {
