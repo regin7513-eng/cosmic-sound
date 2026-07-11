@@ -2079,7 +2079,26 @@ a:hover { text-decoration: underline; }
         z-index: 200;
     }
 
-    .player-progress { display: none; }
+    .player-progress {
+        display: block;
+        position: absolute;
+        top: -2px;
+        left: 0;
+        right: 0;
+        padding: 0;
+        height: 3px;
+        z-index: 5;
+    }
+    .player-progress span { display: none; }
+    .player-progress .progress-bar {
+        width: 100%;
+        height: 3px;
+        border-radius: 0;
+        cursor: pointer;
+    }
+    .player-progress .progress-bar::after { top: -6px; bottom: -6px; }
+    .player-progress .progress-bar:hover { height: 3px; }
+    .player-progress .progress-bar-fill { background: var(--pink); }
     .player-right { display: none; }
 
     .player-info {
