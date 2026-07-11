@@ -15,7 +15,7 @@ if ($action === 'search' && $query) {
     $data = fetchJson($apiUrl);
 
     if (!$data || empty($data['result'])) {
-        echo json_encode(['success' => false, 'data' => []]);
+        echo json_encode(['success' => false, 'data' => [], 'debug_url' => $apiUrl, 'debug_data' => $data]);
         exit;
     }
 
@@ -75,14 +75,20 @@ function fetchJson($url) {
         CURLOPT_HTTPHEADER => [
             'Accept: application/json',
             'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Referer: https://www.sankavollerei.web.id/',
+            'Origin: https://www.sankavollerei.web.id',
         ],
     ]);
     $resp = curl_exec($ch);
     $err = curl_error($ch);
+    $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
 
     if ($err) return null;
-    return json_decode($resp, true);
+    if (empty($resp)) return null;
+    $decoded = json_decode($resp, true);
+    if (!$decoded) return null;
+    return $decoded;
 }
 
 function parseDuration($dur) {

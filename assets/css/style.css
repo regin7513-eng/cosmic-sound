@@ -25,13 +25,14 @@
     --player-height: 80px;
 }
 
-html { font-size: 16px; -webkit-font-smoothing: antialiased; }
+html { font-size: 16px; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
 
 body {
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     background: var(--bg-base);
     color: var(--text);
     min-height: 100vh;
+    overflow-x: hidden;
 }
 
 h1, h2, h3, h4 { font-weight: 700; letter-spacing: -0.02em; }
@@ -451,7 +452,7 @@ a:hover { text-decoration: underline; }
 .main-content {
     background: #0a0014;
     overflow-y: auto;
-    overflow-x: clip;
+    overflow-x: hidden;
     padding: 0;
     display: flex;
     flex-direction: column;
@@ -2972,7 +2973,7 @@ a:hover { text-decoration: underline; }
         margin-right: 0 !important;
         width: 100% !important;
         max-width: 100% !important;
-        overflow-x: clip !important;
+        overflow-x: hidden !important;
     }
     .main-content.np-collapsed {
         margin-right: 0 !important;
