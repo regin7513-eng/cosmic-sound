@@ -2560,7 +2560,8 @@ a:hover { text-decoration: underline; }
 
 /* ===== MOBILE EMERGENCY OVERRIDE (last rule wins) ===== */
 @media (max-width: 768px) {
-    .now-playing-overlay:not(.np-mobile-active) {
+    .now-playing-overlay:not(.np-mobile-active),
+    .now-playing-overlay.np-collapsed {
         display: none !important;
         width: 0 !important;
         height: 0 !important;
@@ -2569,11 +2570,19 @@ a:hover { text-decoration: underline; }
         border-left: none !important;
         padding: 0 !important;
         margin: 0 !important;
+        background: none !important;
+        background-image: none !important;
+        box-shadow: none !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
     }
-    .now-playing-overlay.np-collapsed {
+    .now-playing-overlay:not(.np-mobile-active)::before,
+    .now-playing-overlay.np-collapsed::before {
         display: none !important;
-        width: 0 !important;
-        height: 0 !important;
+    }
+    .now-playing-overlay:not(.np-mobile-active)::after,
+    .now-playing-overlay.np-collapsed::after {
+        display: none !important;
     }
     .main-content {
         margin-right: 0 !important;
