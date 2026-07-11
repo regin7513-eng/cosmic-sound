@@ -166,13 +166,24 @@ function initPlayer() {
     document.getElementById('volume-btn')?.addEventListener('click', toggleMute);
 
     audio.volume = 0.7;
+    audio.preload = 'auto';
     document.getElementById('volume-slider').style.setProperty('--vol-pct', '70%');
     audio.addEventListener('timeupdate', () => { updateProgress(); updateLyricsHighlight(); updateNpLyricsHighlight(); });
     audio.addEventListener('loadedmetadata', updateDuration);
-    audio.addEventListener('play', () => { isPlaying = true; updatePlayButton(); refreshGrid(); });
-    audio.addEventListener('pause', () => { isPlaying = false; updatePlayButton(); refreshGrid(); });
+    audio.addEventListener('play', () => { isPlaying = true; updatePlayButton(); refreshGrid(); updateMediaSessionState(); });
+    audio.addEventListener('pause', () => { isPlaying = false; updatePlayButton(); refreshGrid(); updateMediaSessionState(); });
     audio.addEventListener('ended', handleSongEnd);
     audio.addEventListener('error', () => showToast('Unable to play this track'));
+
+    if ('mediaSession' in navigator) {
+        navigator.mediaSession.setActionHandler('play', function() { audio.play().catch(function(){}); });
+        navigator.mediaSession.setActionHandler('pause', function() { audio.pause(); });
+        navigator.mediaSession.setActionHandler('previoustrack', playPrevious);
+        navigator.mediaSession.setActionHandler('nexttrack', playNext);
+        navigator.mediaSession.setActionHandler('seekto', function(e) {
+            if (e.seekTime != null) audio.currentTime = e.seekTime;
+        });
+    }
 }
 
 async function loadFavoriteIds() {
@@ -748,17 +759,14 @@ function playSongDirect() {
         return;
     }
 
-    var prevSrc = audio.currentSrc;
     audio.pause();
-    audio.removeAttribute('src');
-    audio.load();
 
     currentSongId++;
     var myId = currentSongId;
 
     updatePlayerUI();
     updatePlayButton();
-    refreshGrid();
+    if (!isMobile()) refreshGrid();
 
     if (lyricsVisible && currentSong) {
         loadLyrics(currentSong);
@@ -795,7 +803,10 @@ function playWithUrl(mp3Url, myId) {
     audio.src = mp3Url;
     audio.load();
     audio.play().then(function() {
-        if (myId === currentSongId) addToRecent(currentSong);
+        if (myId === currentSongId) {
+            addToRecent(currentSong);
+            updateMediaSessionMetadata();
+        }
     }).catch(function() {
         if (myId === currentSongId) showToast('Unable to play this track');
     });
@@ -846,6 +857,23 @@ function playNext() {
 function handleSongEnd() {
     if (isRepeating) { audio.currentTime = 0; audio.play(); }
     else playNext();
+}
+
+function updateMediaSessionState() {
+    if (!('mediaSession' in navigator)) return;
+    navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
+}
+
+function updateMediaSessionMetadata() {
+    if (!('mediaSession' in navigator) || !currentSong) return;
+    navigator.mediaSession.metadata = new MediaMetadata({
+        title: currentSong.title || 'Unknown',
+        artist: currentSong.artist || 'Unknown',
+        album: currentSong.album || '',
+        artwork: currentSong.cover_image ? [
+            { src: currentSong.cover_image, sizes: '512x512', type: 'image/jpeg' }
+        ] : []
+    });
 }
 
 function seek(e) {
@@ -991,6 +1019,16 @@ function updatePlayButton() {
 }
 
 function refreshGrid() {
+    if (isMobile()) {
+        clearTimeout(refreshGridTimer);
+        refreshGridTimer = setTimeout(refreshGridNow, 150);
+    } else {
+        refreshGridNow();
+    }
+}
+
+var refreshGridTimer;
+function refreshGridNow() {
     document.querySelectorAll('.song-grid').forEach(function(grid) {
         if (grid.id === 'user-playlists-grid') return;
         if (grid._songs && grid._songs.length > 0) {
