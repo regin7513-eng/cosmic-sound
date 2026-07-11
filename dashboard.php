@@ -188,13 +188,6 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'User');
                 </div>
                 <div class="song-grid"></div>
 
-                <!-- Mobile: Recently Played in Home -->
-                <div class="mobile-home-extras">
-                    <div class="section-header">
-                        <h2>Recently Played</h2>
-                    </div>
-                    <div class="song-grid" id="mobile-recent-grid"></div>
-                </div>
             </div>
 
             <!-- Section: Favorites -->
@@ -210,10 +203,20 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'User');
                 <div class="mobile-search-box">
                     <input type="text" id="mobile-search-input" class="mobile-search-input" placeholder="What do you want to listen to?" oninput="onMobileSearchInput(this.value)">
                 </div>
-                <div class="section-header">
-                    <h2 id="mobile-search-title">Search</h2>
+
+                <div id="search-default-view">
+                    <div class="section-header"><h2>Artists</h2></div>
+                    <div class="artist-grid" id="search-artists-grid"></div>
+                    <div class="section-header" style="margin-top:0.75rem"><h2>Albums</h2></div>
+                    <div class="song-grid" id="search-albums-grid"></div>
                 </div>
-                <div class="song-grid" id="mobile-search-grid"></div>
+
+                <div id="search-results-view" style="display:none">
+                    <div class="section-header">
+                        <h2 id="mobile-search-title">Results</h2>
+                    </div>
+                    <div class="song-grid" id="mobile-search-grid"></div>
+                </div>
             </div>
 
             <!-- Section: Recently Played -->
@@ -250,19 +253,6 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'User');
                     </button>
                 </div>
                 <div class="song-grid" id="user-playlists-grid"></div>
-
-                <!-- Mobile: Artists & Albums in Library -->
-                <div class="mobile-library-extras">
-                    <div class="section-header">
-                        <h2>Artists</h2>
-                    </div>
-                    <div class="artist-grid" id="mobile-artists-grid"></div>
-
-                    <div class="section-header" style="margin-top: 1rem;">
-                        <h2>Albums</h2>
-                    </div>
-                    <div class="song-grid" id="mobile-albums-grid"></div>
-                </div>
             </div>
         </main>
     </div>

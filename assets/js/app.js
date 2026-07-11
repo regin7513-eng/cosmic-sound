@@ -113,8 +113,13 @@ function mobileNav(section, btn) {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             var searchSection = document.getElementById('section-search');
             if (searchSection) searchSection.classList.add('active');
+            var defaultView = document.getElementById('search-default-view');
+            var resultsView = document.getElementById('search-results-view');
+            if (defaultView) defaultView.style.display = '';
+            if (resultsView) resultsView.style.display = 'none';
+            loadMobileExtras();
             var searchInput = document.getElementById('mobile-search-input');
-            if (searchInput) searchInput.focus();
+            if (searchInput) { searchInput.value = ''; searchInput.focus(); }
         } else {
             document.getElementById('search-input')?.focus();
         }
@@ -520,33 +525,23 @@ async function loadRecent() {
 function loadMobileExtras() {
     if (!isMobile()) return;
 
-    var recentGrid = document.getElementById('mobile-recent-grid');
-    if (recentGrid) {
-        loadRecentFromStorage();
-        if (recentSongs.length > 0) {
-            renderGrid(recentGrid, recentSongs);
-        } else {
-            recentGrid.innerHTML = '<div class="empty-state" style="padding:1rem 0"><p style="color:var(--text-muted);font-size:0.8rem">No recently played songs yet</p></div>';
-        }
-    }
-
-    var artistsGrid = document.getElementById('mobile-artists-grid');
+    var artistsGrid = document.getElementById('search-artists-grid');
     if (artistsGrid) {
         var artists = renderArtistCards(allKnownSongs);
         if (artists.length > 0) {
-            artistsGrid.innerHTML = artists.slice(0, 6).map(artistCardHTML).join('');
+            artistsGrid.innerHTML = artists.slice(0, 12).map(artistCardHTML).join('');
         } else {
-            artistsGrid.innerHTML = '<div class="empty-state" style="padding:1rem 0"><p style="color:var(--text-muted);font-size:0.8rem">No artists yet</p></div>';
+            artistsGrid.innerHTML = '<p style="color:var(--text-muted);font-size:0.75rem;padding:0.5rem 0">No artists yet</p>';
         }
     }
 
-    var albumsGrid = document.getElementById('mobile-albums-grid');
+    var albumsGrid = document.getElementById('search-albums-grid');
     if (albumsGrid) {
         var albums = renderAlbumCards(allKnownSongs);
         if (albums.length > 0) {
-            albumsGrid.innerHTML = albums.slice(0, 6).map(albumCardHTML).join('');
+            albumsGrid.innerHTML = albums.slice(0, 12).map(albumCardHTML).join('');
         } else {
-            albumsGrid.innerHTML = '<div class="empty-state" style="padding:1rem 0"><p style="color:var(--text-muted);font-size:0.8rem">No albums yet</p></div>';
+            albumsGrid.innerHTML = '<p style="color:var(--text-muted);font-size:0.75rem;padding:0.5rem 0">No albums yet</p>';
         }
     }
 }
@@ -1133,13 +1128,17 @@ function onSearchInput(q) {
 var mobileSearchTimeout;
 function onMobileSearchInput(q) {
     clearTimeout(mobileSearchTimeout);
+    var defaultView = document.getElementById('search-default-view');
+    var resultsView = document.getElementById('search-results-view');
     if (!q.trim()) {
-        var grid = document.getElementById('mobile-search-grid');
-        if (grid) grid.innerHTML = '';
-        document.getElementById('mobile-search-title').textContent = 'Search';
+        if (defaultView) defaultView.style.display = '';
+        if (resultsView) resultsView.style.display = 'none';
+        loadMobileExtras();
         return;
     }
-    mobileSearchTimeout = setTimeout(function() { searchMusicMobile(q); }, 600);
+    if (defaultView) defaultView.style.display = 'none';
+    if (resultsView) resultsView.style.display = '';
+    mobileSearchTimeout = setTimeout(function() { searchMusicMobile(q); }, 400);
 }
 
 async function searchMusicMobile(query) {
@@ -1147,7 +1146,7 @@ async function searchMusicMobile(query) {
     var grid = document.getElementById('mobile-search-grid');
     var title = document.getElementById('mobile-search-title');
     if (!grid) return;
-    title.textContent = 'Search';
+    title.textContent = 'Results';
     grid.innerHTML = '<div class="empty-state"><div class="loading-spinner"></div><h3 style="margin-top:1rem">Searching...</h3></div>';
     try {
         const res = await fetch(API_BASE + '/sankavollerei.php?action=search&q=' + encodeURIComponent(query) + '&limit=18');
