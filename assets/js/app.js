@@ -892,12 +892,13 @@ function updateMediaSessionMetadata() {
     var artUrl = currentSong.cover_image || '';
     var artwork = [];
     if (artUrl) {
+        var proxyUrl = API_BASE + '/artwork.php?url=' + encodeURIComponent(artUrl);
         artwork = [
-            { src: artUrl, sizes: '96x96', type: 'image/jpeg' },
-            { src: artUrl, sizes: '128x128', type: 'image/jpeg' },
-            { src: artUrl, sizes: '192x192', type: 'image/jpeg' },
-            { src: artUrl, sizes: '256x256', type: 'image/jpeg' },
-            { src: artUrl, sizes: '512x512', type: 'image/jpeg' }
+            { src: proxyUrl, sizes: '96x96', type: 'image/jpeg' },
+            { src: proxyUrl, sizes: '128x128', type: 'image/jpeg' },
+            { src: proxyUrl, sizes: '192x192', type: 'image/jpeg' },
+            { src: proxyUrl, sizes: '256x256', type: 'image/jpeg' },
+            { src: proxyUrl, sizes: '512x512', type: 'image/jpeg' }
         ];
     }
     navigator.mediaSession.metadata = new MediaMetadata({
