@@ -506,10 +506,11 @@ async function createPlaylist(e) {
     }
 }
 
+var playlistCache = {};
+
 async function loadPlaylist(id) {
     const grid = document.querySelector('#section-home .song-grid');
     if (!grid) return;
-    grid.innerHTML = '<div class="empty-state"><div class="loading-spinner"></div><h3 style="margin-top:1rem">Loading...</h3></div>';
 
     const playlists = {
         'trending': { name: 'Trending', q: 'top hits 2025' },
@@ -526,6 +527,19 @@ async function loadPlaylist(id) {
 
     const pl = playlists[id] || playlists['trending'];
 
+    if (playlistCache[id]) {
+        var cached = playlistCache[id];
+        allSongs = cached;
+        accumulateKnown(allSongs);
+        document.getElementById('playlist-title').textContent = pl.name;
+        renderGrid(grid, allSongs);
+        preloadUrls(allSongs);
+        if (isMobile()) loadMobileExtras();
+        return;
+    }
+
+    grid.innerHTML = '<div class="empty-state"><div class="loading-spinner"></div><h3 style="margin-top:1rem">Loading...</h3></div>';
+
     for (var attempt = 0; attempt < 3; attempt++) {
         try {
             var ts = Date.now();
@@ -533,6 +547,7 @@ async function loadPlaylist(id) {
             const data = await res.json();
 
             if (data.success && data.data && data.data.length > 0) {
+                playlistCache[id] = data.data;
                 allSongs = data.data;
                 accumulateKnown(allSongs);
                 document.getElementById('playlist-title').textContent = pl.name;
@@ -542,7 +557,7 @@ async function loadPlaylist(id) {
                 return;
             }
         } catch (e) {
-            if (attempt < 2) { await new Promise(r => setTimeout(r, 1000)); continue; }
+            if (attempt < 2) { await new Promise(r => setTimeout(r, 500)); continue; }
         }
     }
     grid.innerHTML = emptyState('Couldn\'t load playlist', 'Check your connection and try again');

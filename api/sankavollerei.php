@@ -70,7 +70,7 @@ function fetchJson($url, $retries = 2) {
         $ch = curl_init($url);
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_TIMEOUT => 20,
+            CURLOPT_TIMEOUT => 12,
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_SSL_VERIFYPEER => false,
             CURLOPT_HTTPHEADER => [
@@ -95,17 +95,17 @@ function fetchJson($url, $retries = 2) {
 
         if ($err) {
             error_log('[sankavollerei] curl error (attempt ' . $attempt . '): ' . $err . ' url=' . $url);
-            if ($attempt < $retries) { usleep(500000); continue; }
+            if ($attempt < $retries) { usleep(300000); continue; }
             return null;
         }
         if (empty($resp)) {
-            if ($attempt < $retries) { usleep(500000); continue; }
+            if ($attempt < $retries) { usleep(300000); continue; }
             return null;
         }
         $decoded = json_decode($resp, true);
         if (!$decoded || ($code !== 200 && $code !== 304)) {
             error_log('[sankavollerei] bad response (attempt ' . $attempt . ') code=' . $code . ' url=' . $url . ' body=' . substr($resp, 0, 200));
-            if ($attempt < $retries) { usleep(500000); continue; }
+            if ($attempt < $retries) { usleep(300000); continue; }
             return null;
         }
         return $decoded;
