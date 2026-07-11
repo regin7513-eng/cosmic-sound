@@ -836,6 +836,8 @@ function playSongDirect() {
     if (cachedUrl) {
         playWithUrl(cachedUrl, myId);
     } else {
+        var silentUnlock = audio.play();
+        if (silentUnlock) { silentUnlock.then(function() { audio.pause(); }).catch(function() {}); }
         fetchDownloadUrl(currentSong.track_url).then(function(downloadUrl) {
             if (myId !== currentSongId) return;
             if (downloadUrl) {
