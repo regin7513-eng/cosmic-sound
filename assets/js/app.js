@@ -105,34 +105,76 @@ function toggleSidebar() {
     if (isMobile() && opening) history.pushState({ sidebar: true }, '', '');
 }
 
+var _searchNavTapped = false;
+var _searchNavTimer = null;
 function mobileNav(section, btn) {
     document.querySelectorAll('.mobile-nav-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     if (section === 'search') {
         if (isMobile()) {
+            if (!_searchNavTapped) {
+                _searchNavTapped = true;
+                document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+                var searchSection = document.getElementById('section-search');
+                if (searchSection) searchSection.classList.add('active');
+                hideSearchActive();
+                loadMobileExtras();
+                clearTimeout(_searchNavTimer);
+                _searchNavTimer = setTimeout(function() { _searchNavTapped = false; }, 2000);
+                return;
+            }
+            _searchNavTapped = false;
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             var searchSection = document.getElementById('section-search');
             if (searchSection) searchSection.classList.add('active');
-            var defaultView = document.getElementById('search-default-view');
-            var resultsView = document.getElementById('search-results-view');
-            var recentView = document.getElementById('search-recent-view');
-            if (defaultView) defaultView.style.display = '';
-            if (resultsView) resultsView.style.display = 'none';
-            if (recentView) recentView.style.display = 'none';
             loadMobileExtras();
             var searchInput = document.getElementById('mobile-search-input');
-            if (searchInput) { searchInput.value = ''; }
-            showRecentSearches();
+            if (searchInput) { searchInput.value = ''; searchInput.focus(); }
+            onSearchFocus();
         } else {
             document.getElementById('search-input')?.focus();
         }
         return;
     }
+    _searchNavTapped = false;
     if (section === 'playlists') section = 'playlists';
     var navLink = document.querySelector('.nav-link[data-section="' + section + '"]');
     if (navLink) {
         showSection(section, navLink);
     }
+}
+
+function onSearchFocus() {
+    var defaultView = document.getElementById('search-default-view');
+    var resultsView = document.getElementById('search-results-view');
+    var recentView = document.getElementById('search-recent-view');
+    var cancelBtn = document.getElementById('mobile-search-cancel');
+    if (cancelBtn) cancelBtn.style.display = '';
+    if (defaultView) defaultView.style.display = 'none';
+    if (resultsView) resultsView.style.display = 'none';
+    showRecentSearches();
+}
+
+function hideSearchActive() {
+    var defaultView = document.getElementById('search-default-view');
+    var resultsView = document.getElementById('search-results-view');
+    var recentView = document.getElementById('search-recent-view');
+    var cancelBtn = document.getElementById('mobile-search-cancel');
+    if (defaultView) defaultView.style.display = '';
+    if (resultsView) resultsView.style.display = 'none';
+    if (recentView) recentView.style.display = 'none';
+    if (cancelBtn) cancelBtn.style.display = 'none';
+}
+
+function cancelSearch() {
+    var input = document.getElementById('mobile-search-input');
+    if (input) input.value = '';
+    hideSearchActive();
+    loadMobileExtras();
+    var suggestionsEl = document.getElementById('mobile-search-suggestions');
+    var listEl = document.getElementById('mobile-search-list');
+    if (suggestionsEl) suggestionsEl.innerHTML = '';
+    if (listEl) listEl.innerHTML = '';
 }
 
 function toggleSidebarSection(titleEl) {
@@ -1148,8 +1190,6 @@ function removeRecentSearch(query) {
     showRecentSearches();
 }
 function showRecentSearches() {
-    var q = document.getElementById('mobile-search-input')?.value || '';
-    if (q.trim()) return;
     var searches = getRecentSearches();
     var recentView = document.getElementById('search-recent-view');
     var defaultView = document.getElementById('search-default-view');
@@ -1166,10 +1206,11 @@ function showRecentSearches() {
     var listEl = document.getElementById('search-recent-list');
     if (!listEl) return;
     listEl.innerHTML = searches.map(function(s) {
-        return '<div class="search-recent-item" onclick="selectRecentSearch(\'' + esc(s).replace(/'/g, "\\'") + '\')">' +
-            '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' +
+        var q = esc(s).replace(/'/g, "\\'");
+        return '<div class="search-recent-item" onclick="selectRecentSearch(\'' + q + '\')">' +
+            '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;color:var(--text-muted)"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' +
             '<span class="search-recent-text">' + esc(s) + '</span>' +
-            '<button class="search-recent-remove" onclick="event.stopPropagation(); removeRecentSearch(\'' + esc(s).replace(/'/g, "\\'") + '\')">' +
+            '<button class="search-recent-remove" onclick="event.stopPropagation(); removeRecentSearch(\'' + q + '\')">' +
                 '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
             '</button>' +
         '</div>';
