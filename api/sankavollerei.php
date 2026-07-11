@@ -15,7 +15,7 @@ if ($action === 'search' && $query) {
     $data = fetchJson($apiUrl);
 
     if (!$data || empty($data['result'])) {
-        echo json_encode(['success' => false, 'data' => [], 'debug_url' => $apiUrl, 'debug_data' => $data]);
+        echo json_encode(['success' => false, 'data' => []]);
         exit;
     }
 
