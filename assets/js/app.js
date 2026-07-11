@@ -321,16 +321,23 @@ function showContextMenu(e, song) {
     contextSong = song;
     const menu = document.getElementById('context-menu');
     const favText = document.getElementById('ctx-fav-text');
-    favText.textContent = isFavorited(song.id) ? 'Remove from Favorites' : 'Add to Favorites';
-    var plBtn = document.getElementById('ctx-add-playlist');
-    if (currentPlaylistId) {
-        plBtn.querySelector('span') || (plBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg><span>Remove from Playlist</span>');
-        var sp = plBtn.querySelector('span');
-        if (sp) sp.textContent = 'Remove from Playlist';
+    const favIcon = document.getElementById('ctx-fav-icon');
+    const plBtn = document.getElementById('ctx-add-playlist');
+    const plIcon = document.getElementById('ctx-pl-icon');
+    const plText = document.getElementById('ctx-pl-text');
+    if (isFavorited(song.id)) {
+        favText.textContent = 'Remove from Favorites';
+        favIcon.innerHTML = '<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/><line x1="2" y1="2" x2="22" y2="22"/>';
     } else {
-        var sp = plBtn.querySelector('span');
-        if (sp) sp.textContent = 'Add to Playlist';
-        plBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span>Add to Playlist</span>';
+        favText.textContent = 'Add to Favorites';
+        favIcon.innerHTML = '<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>';
+    }
+    if (currentPlaylistId) {
+        plIcon.innerHTML = '<line x1="5" y1="12" x2="19" y2="12"/>';
+        plText.textContent = 'Remove from Playlist';
+    } else {
+        plIcon.innerHTML = '<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>';
+        plText.textContent = 'Add to Playlist';
     }
     menu.style.left = Math.min(e.clientX, window.innerWidth - 220) + 'px';
     menu.style.top = Math.min(e.clientY, window.innerHeight - 120) + 'px';
