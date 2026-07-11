@@ -378,6 +378,10 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'User');
                         </button>
                     </div>
                 </div>
+                <div class="np-lyrics-section" id="np-lyrics-section">
+                    <h3>Lyrics</h3>
+                    <div class="np-lyrics-content" id="np-lyrics-content"></div>
+                </div>
                 <div class="np-artist-section" id="np-artist-section">
                     <h3>About the artist</h3>
                     <div class="np-artist-card">

@@ -1721,6 +1721,59 @@ a:hover { text-decoration: underline; }
     .np-progress { max-width: 420px; margin: 0 auto; }
     .np-buttons { justify-content: center; }
     .np-artist-section { max-width: 420px; margin: 0 auto; }
+
+    .np-lyrics-section {
+        display: block;
+        width: 100%;
+        max-width: 420px;
+        margin: 1rem auto 0;
+        background: rgba(255,255,255,0.05);
+        border-radius: 12px;
+        padding: 1rem 1.25rem;
+    }
+    .np-lyrics-section h3 {
+        font-size: 0.9rem;
+        font-weight: 700;
+        margin-bottom: 0.75rem;
+        color: #fff;
+    }
+    .np-lyrics-content {
+        max-height: 300px;
+        overflow-y: auto;
+        scrollbar-width: none;
+    }
+    .np-lyrics-content::-webkit-scrollbar { display: none; }
+    .np-lyrics-line {
+        font-size: 0.82rem;
+        line-height: 1.8;
+        color: rgba(255,255,255,0.4);
+        transition: color 0.3s;
+        cursor: pointer;
+        padding: 0.1rem 0;
+    }
+    .np-lyrics-line.active {
+        color: #fff;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+    .np-lyrics-plain {
+        font-size: 0.82rem;
+        line-height: 1.8;
+        color: rgba(255,255,255,0.6);
+        white-space: pre-line;
+    }
+    .np-lyrics-not-found {
+        text-align: center;
+        padding: 1.5rem 0;
+        color: rgba(255,255,255,0.3);
+        font-size: 0.8rem;
+    }
+    .np-lyrics-loading {
+        text-align: center;
+        padding: 1.5rem 0;
+        color: rgba(255,255,255,0.3);
+        font-size: 0.8rem;
+    }
     .np-collapse-btn { display: none !important; }
     .np-close-btn {
         display: flex !important;
@@ -2402,6 +2455,9 @@ a:hover { text-decoration: underline; }
 }
 
 /* NP Artist Section */
+.np-lyrics-section {
+    display: none;
+}
 .np-artist-section {
     width: 100%;
     background: rgba(255,255,255,0.05);

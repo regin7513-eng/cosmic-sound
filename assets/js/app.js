@@ -158,7 +158,7 @@ function initPlayer() {
 
     audio.volume = 0.7;
     document.getElementById('volume-slider').style.setProperty('--vol-pct', '70%');
-    audio.addEventListener('timeupdate', () => { updateProgress(); updateLyricsHighlight(); });
+    audio.addEventListener('timeupdate', () => { updateProgress(); updateLyricsHighlight(); updateNpLyricsHighlight(); });
     audio.addEventListener('loadedmetadata', updateDuration);
     audio.addEventListener('play', () => { isPlaying = true; updatePlayButton(); refreshGrid(); });
     audio.addEventListener('pause', () => { isPlaying = false; updatePlayButton(); refreshGrid(); });
@@ -1279,6 +1279,88 @@ function updateNowPlaying() {
     document.getElementById('np-artist-bio').textContent = currentSong.artist ? currentSong.artist + ' is an artist on Ginz Song. Enjoy their music and discover more.' : '';
     document.getElementById('np-artist-link').href = 'https://open.spotify.com/search/' + encodeURIComponent(currentSong.artist || '');
     document.getElementById('np-artist-listeners').textContent = '';
+    if (isMobile()) loadNpLyrics(currentSong);
+}
+
+var npLyricsData = [];
+var npLyricsSynced = false;
+
+async function loadNpLyrics(song) {
+    var container = document.getElementById('np-lyrics-content');
+    if (!container) return;
+    if (!song) { container.innerHTML = ''; return; }
+
+    var cacheKey = (song.artist || '') + '|' + (song.title || '');
+    if (lyricsCache[cacheKey]) {
+        renderNpLyrics(lyricsCache[cacheKey]);
+        return;
+    }
+
+    container.innerHTML = '<div class="np-lyrics-loading">Loading lyrics...</div>';
+
+    try {
+        var res = await fetch(API_BASE + '/lyrics.php?' + new URLSearchParams({
+            artist: song.artist || '',
+            track: song.title || ''
+        }));
+        var data = await res.json();
+        lyricsCache[cacheKey] = data;
+        renderNpLyrics(data);
+    } catch {
+        container.innerHTML = '<div class="np-lyrics-not-found">No lyrics available</div>';
+    }
+}
+
+function renderNpLyrics(data) {
+    var container = document.getElementById('np-lyrics-content');
+    if (!container) return;
+
+    if (data.success && data.synced && Array.isArray(data.lyrics)) {
+        npLyricsData = data.lyrics;
+        npLyricsSynced = true;
+        container.innerHTML = data.lyrics.map(function(line, i) {
+            return '<div class="np-lyrics-line" data-time="' + line.time + '" data-index="' + i + '" onclick="seekToNpLyric(' + line.time + ')">' + esc(line.text) + '</div>';
+        }).join('');
+    } else if (data.success && typeof data.lyrics === 'string') {
+        npLyricsSynced = false;
+        container.innerHTML = '<div class="np-lyrics-plain">' + esc(data.lyrics) + '</div>';
+    } else {
+        npLyricsSynced = false;
+        container.innerHTML = '<div class="np-lyrics-not-found">No lyrics available for this song</div>';
+    }
+}
+
+function seekToNpLyric(time) {
+    audio.currentTime = time;
+    if (!isPlaying) audio.play().catch(function() {});
+}
+
+function updateNpLyricsHighlight() {
+    if (!isMobile() || !npLyricsSynced || npLyricsData.length === 0) return;
+    var container = document.getElementById('np-lyrics-content');
+    if (!container) return;
+
+    var currentTime = audio.currentTime;
+    var activeIndex = -1;
+    for (var i = npLyricsData.length - 1; i >= 0; i--) {
+        if (currentTime >= npLyricsData[i].time - 0.1) {
+            activeIndex = i;
+            break;
+        }
+    }
+
+    var lines = container.querySelectorAll('.np-lyrics-line');
+    lines.forEach(function(line, i) {
+        if (i === activeIndex) {
+            if (!line.classList.contains('active')) {
+                line.classList.add('active');
+                var scrollTarget = line.offsetTop - container.offsetTop - container.clientHeight / 3;
+                container.scrollTo({ top: scrollTarget, behavior: 'smooth' });
+            }
+        } else {
+            line.classList.remove('active');
+        }
+    });
 }
 
 function toggleNpFav() {
