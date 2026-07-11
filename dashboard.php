@@ -110,7 +110,7 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'User');
                     <div class="header-avatar" onclick="toggleUserMenu()" id="header-avatar"><?php echo strtoupper(substr($username, 0, 1)); ?></div>
                     <div class="user-menu-dropdown" id="user-menu-dropdown">
                         <div class="user-menu-email"><?php echo htmlspecialchars($_SESSION['email'] ?? ''); ?></div>
-                        <button class="user-menu-item" onclick="window.location.href='login.php'">
+                        <button class="user-menu-item" onclick="addAccount()">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
                             Add Account
                         </button>

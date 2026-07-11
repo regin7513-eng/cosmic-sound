@@ -1385,6 +1385,14 @@ function toggleUserMenu() {
     menu.classList.toggle('active');
 }
 
+function addAccount() {
+    fetch(API_BASE + '/logout.php', { method: 'POST' }).then(function() {
+        window.location.href = 'register.php';
+    }).catch(function() {
+        window.location.href = 'register.php';
+    });
+}
+
 document.addEventListener('click', function(e) {
     var menu = document.getElementById('user-menu-dropdown');
     var avatar = document.getElementById('header-avatar');
