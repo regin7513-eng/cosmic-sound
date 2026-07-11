@@ -210,7 +210,7 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'User');
 
                 <div id="search-recent-view" style="display:none">
                     <div class="search-recent-header">
-                        <h2>Recent Searches</h2>
+                        <h2>Recently Played</h2>
                         <button class="search-recent-clear" onclick="clearRecentSearches()">Clear all</button>
                     </div>
                     <div id="search-recent-list"></div>

@@ -1910,16 +1910,36 @@ a:hover { text-decoration: underline; }
         display: flex;
         align-items: center;
         gap: 0.7rem;
-        padding: 0.55rem 0;
+        padding: 0.5rem 0;
         border-bottom: 1px solid rgba(255,255,255,0.04);
         cursor: pointer;
     }
-    .search-recent-item:active { opacity: 0.6; }
-    .search-recent-item svg { flex-shrink: 0; color: var(--text-muted); }
-    .search-recent-text {
+    .search-recent-item:active { opacity: 0.7; }
+    .search-recent-cover {
+        width: 48px;
+        height: 48px;
+        border-radius: 6px;
+        object-fit: cover;
+        flex-shrink: 0;
+        background: rgba(255,255,255,0.06);
+    }
+    .search-recent-info {
         flex: 1;
+        min-width: 0;
+    }
+    .search-recent-title {
         font-size: 0.82rem;
+        font-weight: 600;
         color: var(--text);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin: 0;
+    }
+    .search-recent-artist {
+        font-size: 0.7rem;
+        color: var(--text-muted);
+        margin: 0.15rem 0 0;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;

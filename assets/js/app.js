@@ -1180,7 +1180,8 @@ function addRecentSearch(query) {
     localStorage.setItem('ginz_recent_searches', JSON.stringify(searches));
 }
 function clearRecentSearches() {
-    localStorage.removeItem('ginz_recent_searches');
+    recentSongs = [];
+    try { localStorage.removeItem('recentSongs'); } catch {}
     var recentView = document.getElementById('search-recent-view');
     if (recentView) recentView.style.display = 'none';
 }
@@ -1190,12 +1191,12 @@ function removeRecentSearch(query) {
     showRecentSearches();
 }
 function showRecentSearches() {
-    var searches = getRecentSearches();
     var recentView = document.getElementById('search-recent-view');
     var defaultView = document.getElementById('search-default-view');
     var resultsView = document.getElementById('search-results-view');
     if (!recentView) return;
-    if (searches.length === 0) {
+    loadRecentFromStorage();
+    if (recentSongs.length === 0) {
         recentView.style.display = 'none';
         if (defaultView) defaultView.style.display = '';
         return;
@@ -1205,16 +1206,37 @@ function showRecentSearches() {
     recentView.style.display = '';
     var listEl = document.getElementById('search-recent-list');
     if (!listEl) return;
-    listEl.innerHTML = searches.map(function(s) {
-        var q = esc(s).replace(/'/g, "\\'");
-        return '<div class="search-recent-item" onclick="selectRecentSearch(\'' + q + '\')">' +
-            '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;color:var(--text-muted)"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' +
-            '<span class="search-recent-text">' + esc(s) + '</span>' +
-            '<button class="search-recent-remove" onclick="event.stopPropagation(); removeRecentSearch(\'' + q + '\')">' +
+    listEl.innerHTML = recentSongs.map(function(song, i) {
+        var songId = esc(song.id).replace(/'/g, "\\'");
+        return '<div class="search-recent-item" onclick="playRecentSong(\'' + songId + '\')">' +
+            '<img class="search-recent-cover" src="' + esc(song.cover_image) + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">' +
+            '<div class="search-recent-info">' +
+                '<h4 class="search-recent-title">' + esc(song.title) + '</h4>' +
+                '<p class="search-recent-artist">' + esc(song.artist) + '</p>' +
+            '</div>' +
+            '<button class="search-recent-remove" onclick="event.stopPropagation(); removeRecentSong(\'' + songId + '\')">' +
                 '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
             '</button>' +
         '</div>';
     }).join('');
+}
+
+function playRecentSong(songId) {
+    for (var i = 0; i < recentSongs.length; i++) {
+        if (recentSongs[i].id === songId) {
+            currentSong = recentSongs[i];
+            allSongs = recentSongs;
+            currentIndex = i;
+            playSongDirect();
+            return;
+        }
+    }
+}
+
+function removeRecentSong(songId) {
+    recentSongs = recentSongs.filter(function(s) { return s.id !== songId; });
+    try { localStorage.setItem('recentSongs', JSON.stringify(recentSongs)); } catch {}
+    showRecentSearches();
 }
 function selectRecentSearch(query) {
     var input = document.getElementById('mobile-search-input');
