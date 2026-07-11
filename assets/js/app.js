@@ -1405,6 +1405,8 @@ async function handleLogin(e) {
     var alertEl = document.getElementById('alert');
     var btn = e.target.querySelector('button[type="submit"]');
     var orig = btn.textContent;
+    var loggedEmails = JSON.parse(localStorage.getItem('ginz_logged_emails') || '[]');
+    var isReturning = loggedEmails.includes(email.toLowerCase().trim());
     btn.disabled = true; btn.textContent = 'Signing in...';
     try {
         var res = await fetch(API_BASE + '/login.php', {
@@ -1414,7 +1416,11 @@ async function handleLogin(e) {
         });
         var data = await res.json();
         if (data.success) {
-            showAlert(alertEl, 'Welcome back!', 'success');
+            if (!loggedEmails.includes(email.toLowerCase().trim())) {
+                loggedEmails.push(email.toLowerCase().trim());
+                localStorage.setItem('ginz_logged_emails', JSON.stringify(loggedEmails));
+            }
+            showAlert(alertEl, isReturning ? 'Welcome back!' : 'Welcome!', 'success');
             setTimeout(function() { window.location.href = 'dashboard.php'; }, 600);
         } else {
             showAlert(alertEl, data.message, 'error');
