@@ -889,50 +889,26 @@ function updateMediaSessionPosition() {
     } catch(e) {}
 }
 
-function artworkToBlob(src, callback) {
-    try {
-        var img = new Image();
-        img.crossOrigin = 'anonymous';
-        img.onload = function() {
-            try {
-                var c = document.createElement('canvas');
-                c.width = 512; c.height = 512;
-                c.getContext('2d').drawImage(img, 0, 0, 512, 512);
-                c.toBlob(function(blob) {
-                    callback(blob ? URL.createObjectURL(blob) : src);
-                }, 'image/jpeg', 0.8);
-            } catch(e) { callback(src); }
-        };
-        img.onerror = function() { callback(src); };
-        img.src = src;
-    } catch(e) { callback(src); }
-}
-
 function updateMediaSessionMetadata() {
     if (!('mediaSession' in navigator) || !currentSong) return;
     var artUrl = currentSong.cover_image || '';
-    if (!artUrl) {
-        navigator.mediaSession.metadata = new MediaMetadata({
-            title: currentSong.title || 'Unknown',
-            artist: currentSong.artist || 'Unknown',
-            album: 'Ginz Song'
-        });
-        return;
+    var artwork = [];
+    if (artUrl) {
+        var proxyUrl = API_BASE + '/artwork.php?url=' + encodeURIComponent(artUrl);
+        artwork = [
+            { src: proxyUrl, sizes: '96x96', type: 'image/jpeg' },
+            { src: proxyUrl, sizes: '192x192', type: 'image/jpeg' },
+            { src: proxyUrl, sizes: '512x512', type: 'image/jpeg' }
+        ];
     }
-    var proxySrc = API_BASE + '/artwork.php?url=' + encodeURIComponent(artUrl);
-    artworkToBlob(proxySrc, function(blobUrl) {
-        if (!currentSong) return;
+    try {
         navigator.mediaSession.metadata = new MediaMetadata({
             title: currentSong.title || 'Unknown',
             artist: currentSong.artist || 'Unknown',
             album: 'Ginz Song',
-            artwork: [
-                { src: blobUrl, sizes: '96x96', type: 'image/jpeg' },
-                { src: blobUrl, sizes: '192x192', type: 'image/jpeg' },
-                { src: blobUrl, sizes: '512x512', type: 'image/jpeg' }
-            ]
+            artwork: artwork
         });
-    });
+    } catch(e) {}
 }
 
 document.addEventListener('visibilitychange', function() {
