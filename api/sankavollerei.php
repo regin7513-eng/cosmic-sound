@@ -10,35 +10,6 @@ $limit  = min((int)($_GET['limit'] ?? 18), 50);
 $API_KEY = 'planaai';
 $BASE = 'https://www.sankavollerei.web.id';
 
-if ($action === 'debug' && $query) {
-    $apiUrl = "$BASE/search/spotify?apikey=$API_KEY&q=" . urlencode($query);
-    $ch = curl_init($apiUrl);
-    curl_setopt_array($ch, [
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_TIMEOUT => 20,
-        CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_SSL_VERIFYPEER => false,
-        CURLOPT_HTTPHEADER => [
-            'Accept: application/json',
-            'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            'Referer: https://www.sankavollerei.web.id/',
-            'Origin: https://www.sankavollerei.web.id',
-        ],
-    ]);
-    $resp = curl_exec($ch);
-    $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    $err = curl_error($ch);
-    curl_close($ch);
-    echo json_encode([
-        'url' => $apiUrl,
-        'http_code' => $code,
-        'error' => $err,
-        'response_length' => strlen($resp),
-        'response_preview' => substr($resp, 0, 500)
-    ]);
-    exit;
-}
-
 if ($action === 'search' && $query) {
     $apiUrl = "$BASE/search/spotify?apikey=$API_KEY&q=" . urlencode($query);
     $data = fetchJson($apiUrl);
@@ -94,39 +65,52 @@ if ($action === 'search' && $query) {
     echo json_encode(['error' => 'Invalid request']);
 }
 
-function fetchJson($url) {
-    $ch = curl_init($url);
-    curl_setopt_array($ch, [
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_TIMEOUT => 20,
-        CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_SSL_VERIFYPEER => false,
-        CURLOPT_HTTPHEADER => [
-            'Accept: application/json',
-            'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            'Referer: https://www.sankavollerei.web.id/',
-            'Origin: https://www.sankavollerei.web.id',
-        ],
-    ]);
-    $resp = curl_exec($ch);
-    $err = curl_error($ch);
-    $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
+function fetchJson($url, $retries = 2) {
+    for ($attempt = 0; $attempt <= $retries; $attempt++) {
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT => 20,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_HTTPHEADER => [
+                'Accept: application/json',
+                'Cache-Control: no-cache',
+                'Pragma: no-cache',
+                'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+                'Referer: https://www.sankavollerei.web.id/',
+                'Origin: https://www.sankavollerei.web.id',
+                'sec-ch-ua: "Google Chrome";v="131", "Chromium";v="131"',
+                'sec-ch-ua-mobile: ?0',
+                'sec-ch-ua-platform: "Windows"',
+                'sec-fetch-dest: empty',
+                'sec-fetch-mode: cors',
+                'sec-fetch-site: cross-site',
+            ],
+        ]);
+        $resp = curl_exec($ch);
+        $err = curl_error($ch);
+        $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
 
-    if ($err) {
-        error_log('[sankavollerei] curl error: ' . $err . ' url=' . $url);
-        return null;
+        if ($err) {
+            error_log('[sankavollerei] curl error (attempt ' . $attempt . '): ' . $err . ' url=' . $url);
+            if ($attempt < $retries) { usleep(500000); continue; }
+            return null;
+        }
+        if (empty($resp)) {
+            if ($attempt < $retries) { usleep(500000); continue; }
+            return null;
+        }
+        $decoded = json_decode($resp, true);
+        if (!$decoded || ($code !== 200 && $code !== 304)) {
+            error_log('[sankavollerei] bad response (attempt ' . $attempt . ') code=' . $code . ' url=' . $url . ' body=' . substr($resp, 0, 200));
+            if ($attempt < $retries) { usleep(500000); continue; }
+            return null;
+        }
+        return $decoded;
     }
-    if (empty($resp)) {
-        error_log('[sankavollerei] empty response url=' . $url);
-        return null;
-    }
-    $decoded = json_decode($resp, true);
-    if (!$decoded) {
-        error_log('[sankavollerei] json decode failed code=' . $code . ' url=' . $url . ' body=' . substr($resp, 0, 200));
-        return null;
-    }
-    return $decoded;
+    return null;
 }
 
 function parseDuration($dur) {

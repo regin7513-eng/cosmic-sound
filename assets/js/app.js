@@ -100,8 +100,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 .then(function(r) { return r.json(); })
                 .then(function(data) {
                     if (!data.success && data.expired) {
-                        if (currentSong && isPlaying) audio.pause();
-                        window.location.href = '/cosmic-sound/login.php';
+                        var hasContent = document.querySelector('.song-grid .song-card');
+                        if (!hasContent) {
+                            if (currentSong && isPlaying) audio.pause();
+                            window.location.href = '/cosmic-sound/login.php';
+                        }
                     } else if (data.success) {
                         loadFavoriteIds();
                         refreshGrid();
@@ -522,24 +525,26 @@ async function loadPlaylist(id) {
 
     const pl = playlists[id] || playlists['trending'];
 
-    try {
-        const res = await fetch(API_BASE + '/sankavollerei.php?action=search&q=' + encodeURIComponent(pl.q) + '&limit=18');
-        const data = await res.json();
+    for (var attempt = 0; attempt < 3; attempt++) {
+        try {
+            var ts = Date.now();
+            const res = await fetch(API_BASE + '/sankavollerei.php?action=search&q=' + encodeURIComponent(pl.q) + '&limit=18&_t=' + ts);
+            const data = await res.json();
 
-        if (!data.success || !data.data || data.data.length === 0) {
-            grid.innerHTML = emptyState('Nothing here yet', 'Try another playlist');
-            return;
+            if (data.success && data.data && data.data.length > 0) {
+                allSongs = data.data;
+                accumulateKnown(allSongs);
+                document.getElementById('playlist-title').textContent = pl.name;
+                renderGrid(grid, allSongs);
+                preloadUrls(allSongs);
+                if (isMobile()) loadMobileExtras();
+                return;
+            }
+        } catch (e) {
+            if (attempt < 2) { await new Promise(r => setTimeout(r, 1000)); continue; }
         }
-
-        allSongs = data.data;
-        accumulateKnown(allSongs);
-        document.getElementById('playlist-title').textContent = pl.name;
-        renderGrid(grid, allSongs);
-        preloadUrls(allSongs);
-        if (isMobile()) loadMobileExtras();
-    } catch (e) {
-        grid.innerHTML = emptyState('Couldn\'t load playlist', esc(e.message));
     }
+    grid.innerHTML = emptyState('Couldn\'t load playlist', 'Check your connection and try again');
 }
 
 async function searchMusic(query) {
