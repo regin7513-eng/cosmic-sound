@@ -1226,10 +1226,14 @@ function toggleNpCollapse() {
 }
 
 function restoreNpState() {
-    if (isMobile()) return;
+    var np = document.getElementById('now-playing-overlay');
+    var main = document.querySelector('.main-content');
+    if (isMobile()) {
+        if (np) { np.classList.remove('np-collapsed'); np.classList.remove('np-mobile-active'); }
+        if (main) main.classList.remove('np-collapsed');
+        return;
+    }
     if (localStorage.getItem('np_collapsed') === '1') {
-        var np = document.getElementById('now-playing-overlay');
-        var main = document.querySelector('.main-content');
         if (np) np.classList.add('np-collapsed');
         if (main) main.classList.add('np-collapsed');
     }
