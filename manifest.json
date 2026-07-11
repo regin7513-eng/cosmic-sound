@@ -6,5 +6,12 @@
     "background_color": "#0a0014",
     "theme_color": "#0a0014",
     "orientation": "any",
-    "icons": []
+    "icons": [
+        {
+            "src": "icon.php",
+            "sizes": "512x512",
+            "type": "image/svg+xml",
+            "purpose": "any"
+        }
+    ]
 }
