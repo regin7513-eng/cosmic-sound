@@ -136,6 +136,7 @@ var _searchNavTimer = null;
 function mobileNav(section, btn) {
     document.querySelectorAll('.mobile-nav-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
+    currentPlaylistId = null;
     if (section === 'search') {
         if (isMobile()) {
             if (!_searchNavTapped) {

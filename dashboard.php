@@ -534,6 +534,7 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'User');
             document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
             document.getElementById('section-' + name)?.classList.add('active');
             if (el) el.classList.add('active');
+            if (name !== 'playlists') currentPlaylistId = null;
             if (name === 'favorites') loadFavorites();
             if (name === 'playlists') loadUserPlaylists();
             if (name === 'recent') loadRecent();
