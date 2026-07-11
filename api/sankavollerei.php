@@ -10,6 +10,35 @@ $limit  = min((int)($_GET['limit'] ?? 18), 50);
 $API_KEY = 'planaai';
 $BASE = 'https://www.sankavollerei.web.id';
 
+if ($action === 'debug' && $query) {
+    $apiUrl = "$BASE/search/spotify?apikey=$API_KEY&q=" . urlencode($query);
+    $ch = curl_init($apiUrl);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_TIMEOUT => 20,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_SSL_VERIFYPEER => false,
+        CURLOPT_HTTPHEADER => [
+            'Accept: application/json',
+            'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Referer: https://www.sankavollerei.web.id/',
+            'Origin: https://www.sankavollerei.web.id',
+        ],
+    ]);
+    $resp = curl_exec($ch);
+    $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $err = curl_error($ch);
+    curl_close($ch);
+    echo json_encode([
+        'url' => $apiUrl,
+        'http_code' => $code,
+        'error' => $err,
+        'response_length' => strlen($resp),
+        'response_preview' => substr($resp, 0, 500)
+    ]);
+    exit;
+}
+
 if ($action === 'search' && $query) {
     $apiUrl = "$BASE/search/spotify?apikey=$API_KEY&q=" . urlencode($query);
     $data = fetchJson($apiUrl);
@@ -84,10 +113,19 @@ function fetchJson($url) {
     $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
 
-    if ($err) return null;
-    if (empty($resp)) return null;
+    if ($err) {
+        error_log('[sankavollerei] curl error: ' . $err . ' url=' . $url);
+        return null;
+    }
+    if (empty($resp)) {
+        error_log('[sankavollerei] empty response url=' . $url);
+        return null;
+    }
     $decoded = json_decode($resp, true);
-    if (!$decoded) return null;
+    if (!$decoded) {
+        error_log('[sankavollerei] json decode failed code=' . $code . ' url=' . $url . ' body=' . substr($resp, 0, 200));
+        return null;
+    }
     return $decoded;
 }
 
