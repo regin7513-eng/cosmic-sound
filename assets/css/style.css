@@ -1587,7 +1587,7 @@ a:hover { text-decoration: underline; }
         --bottom-nav-height: 60px;
     }
 
-    body { -webkit-tap-highlight-color: transparent; touch-action: manipulation; overscroll-behavior: none; }
+    body { -webkit-tap-highlight-color: transparent; touch-action: pan-y; overscroll-behavior-y: none; }
     html { overscroll-behavior: none; }
     * { -webkit-tap-highlight-color: transparent; }
 
