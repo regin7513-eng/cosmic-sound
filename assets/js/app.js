@@ -107,7 +107,15 @@ function mobileNav(section, btn) {
     document.querySelectorAll('.mobile-nav-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     if (section === 'search') {
-        document.getElementById('search-input')?.focus();
+        if (isMobile()) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            var searchSection = document.getElementById('section-search');
+            if (searchSection) searchSection.classList.add('active');
+            var searchInput = document.getElementById('mobile-search-input');
+            if (searchInput) searchInput.focus();
+        } else {
+            document.getElementById('search-input')?.focus();
+        }
         return;
     }
     var navLink = document.querySelector('.nav-link[data-section="' + section + '"]');
@@ -994,6 +1002,42 @@ function onSearchInput(q) {
         return;
     }
     searchTimeout = setTimeout(function() { searchMusic(q); }, 600);
+}
+
+var mobileSearchTimeout;
+function onMobileSearchInput(q) {
+    clearTimeout(mobileSearchTimeout);
+    if (!q.trim()) {
+        var grid = document.getElementById('mobile-search-grid');
+        if (grid) grid.innerHTML = '';
+        document.getElementById('mobile-search-title').textContent = 'Search';
+        return;
+    }
+    mobileSearchTimeout = setTimeout(function() { searchMusicMobile(q); }, 600);
+}
+
+async function searchMusicMobile(query) {
+    if (!query.trim()) return;
+    var grid = document.getElementById('mobile-search-grid');
+    var title = document.getElementById('mobile-search-title');
+    if (!grid) return;
+    title.textContent = 'Search';
+    grid.innerHTML = '<div class="empty-state"><div class="loading-spinner"></div><h3 style="margin-top:1rem">Searching...</h3></div>';
+    try {
+        const res = await fetch(API_BASE + '/sankavollerei.php?action=search&q=' + encodeURIComponent(query) + '&limit=18');
+        const data = await res.json();
+        if (!data.success || !data.data || data.data.length === 0) {
+            grid.innerHTML = emptyState('No results', 'Try a different search term');
+            return;
+        }
+        title.textContent = 'Results: "' + esc(query) + '"';
+        allSongs = data.data;
+        accumulateKnown(allSongs);
+        renderGrid(grid, allSongs);
+        preloadUrls(allSongs);
+    } catch (e) {
+        grid.innerHTML = emptyState('Search failed', esc(e.message));
+    }
 }
 
 function handleSearch(e) {

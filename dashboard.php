@@ -163,6 +163,18 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'User');
                 <div class="song-grid" id="favorites-grid"></div>
             </div>
 
+            <!-- Section: Search (mobile only) -->
+            <div id="section-search" class="section">
+                <div class="mobile-search-box">
+                    <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input type="text" id="mobile-search-input" class="mobile-search-input" placeholder="What do you want to listen to?" oninput="onMobileSearchInput(this.value)">
+                </div>
+                <div class="section-header">
+                    <h2 id="mobile-search-title">Search</h2>
+                </div>
+                <div class="song-grid" id="mobile-search-grid"></div>
+            </div>
+
             <!-- Section: Recently Played -->
             <div id="section-recent" class="section">
                 <div class="section-header">
