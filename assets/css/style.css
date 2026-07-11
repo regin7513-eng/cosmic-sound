@@ -430,6 +430,8 @@ a:hover { text-decoration: underline; }
 .mobile-header-left,
 .mobile-header-right { display: none; }
 .header-avatar { display: none; }
+.mobile-home-extras,
+.mobile-library-extras { display: none; }
 
 .header-greeting h1 {
     font-size: 1.25rem;
@@ -1649,6 +1651,32 @@ a:hover { text-decoration: underline; }
     .section {
         padding: 0.5rem 0.75rem;
         padding-bottom: calc(var(--player-height) + var(--bottom-nav-height) + 1rem);
+    }
+
+    .mobile-home-extras,
+    .mobile-library-extras {
+        display: block;
+        margin-top: 0.75rem;
+    }
+    .mobile-home-extras .section-header,
+    .mobile-library-extras .section-header {
+        padding: 0;
+        margin-bottom: 0.4rem;
+    }
+    .mobile-home-extras .section-header h2,
+    .mobile-library-extras .section-header h2 {
+        font-size: 1rem;
+        font-weight: 700;
+    }
+    .mobile-home-extras .artist-grid,
+    .mobile-library-extras .artist-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.5rem;
+    }
+    .mobile-home-extras .song-grid,
+    .mobile-library-extras .song-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.5rem;
     }
 
     .mobile-search-box {

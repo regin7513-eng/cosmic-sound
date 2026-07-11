@@ -118,6 +118,7 @@ function mobileNav(section, btn) {
         }
         return;
     }
+    if (section === 'playlists') section = 'playlists';
     var navLink = document.querySelector('.nav-link[data-section="' + section + '"]');
     if (navLink) {
         showSection(section, navLink);
@@ -431,6 +432,7 @@ async function loadPlaylist(id) {
         document.getElementById('playlist-title').textContent = pl.name;
         renderGrid(grid, allSongs);
         preloadUrls(allSongs);
+        if (isMobile()) loadMobileExtras();
     } catch (e) {
         grid.innerHTML = emptyState('Couldn\'t load playlist', esc(e.message));
     }
@@ -492,6 +494,40 @@ async function loadRecent() {
         renderGrid(grid, recentSongs);
     } else {
         grid.innerHTML = emptyState('No recently played songs', 'Songs you play will appear here');
+    }
+}
+
+function loadMobileExtras() {
+    if (!isMobile()) return;
+
+    var recentGrid = document.getElementById('mobile-recent-grid');
+    if (recentGrid) {
+        loadRecentFromStorage();
+        if (recentSongs.length > 0) {
+            renderGrid(recentGrid, recentSongs);
+        } else {
+            recentGrid.innerHTML = '<div class="empty-state" style="padding:1rem 0"><p style="color:var(--text-muted);font-size:0.8rem">No recently played songs yet</p></div>';
+        }
+    }
+
+    var artistsGrid = document.getElementById('mobile-artists-grid');
+    if (artistsGrid) {
+        var artists = renderArtistCards(allKnownSongs);
+        if (artists.length > 0) {
+            artistsGrid.innerHTML = artists.slice(0, 6).map(artistCardHTML).join('');
+        } else {
+            artistsGrid.innerHTML = '<div class="empty-state" style="padding:1rem 0"><p style="color:var(--text-muted);font-size:0.8rem">No artists yet</p></div>';
+        }
+    }
+
+    var albumsGrid = document.getElementById('mobile-albums-grid');
+    if (albumsGrid) {
+        var albums = renderAlbumCards(allKnownSongs);
+        if (albums.length > 0) {
+            albumsGrid.innerHTML = albums.slice(0, 6).map(albumCardHTML).join('');
+        } else {
+            albumsGrid.innerHTML = '<div class="empty-state" style="padding:1rem 0"><p style="color:var(--text-muted);font-size:0.8rem">No albums yet</p></div>';
+        }
     }
 }
 

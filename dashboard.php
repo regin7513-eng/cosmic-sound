@@ -158,6 +158,14 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'User');
                     <h2 id="playlist-title">Trending</h2>
                 </div>
                 <div class="song-grid"></div>
+
+                <!-- Mobile: Recently Played in Home -->
+                <div class="mobile-home-extras">
+                    <div class="section-header">
+                        <h2>Recently Played</h2>
+                    </div>
+                    <div class="song-grid" id="mobile-recent-grid"></div>
+                </div>
             </div>
 
             <!-- Section: Favorites -->
@@ -213,6 +221,19 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'User');
                     </button>
                 </div>
                 <div class="song-grid" id="user-playlists-grid"></div>
+
+                <!-- Mobile: Artists & Albums in Library -->
+                <div class="mobile-library-extras">
+                    <div class="section-header">
+                        <h2>Artists</h2>
+                    </div>
+                    <div class="artist-grid" id="mobile-artists-grid"></div>
+
+                    <div class="section-header" style="margin-top: 1rem;">
+                        <h2>Albums</h2>
+                    </div>
+                    <div class="song-grid" id="mobile-albums-grid"></div>
+                </div>
             </div>
         </main>
     </div>
@@ -489,6 +510,9 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'User');
             if (name === 'recent') loadRecent();
             if (name === 'artists') loadArtists();
             if (name === 'albums') loadAlbums();
+            if (isMobile() && (name === 'playlists' || name === 'home')) {
+                setTimeout(function() { loadMobileExtras(); }, 300);
+            }
         }
 
         async function loadFavorites() {
