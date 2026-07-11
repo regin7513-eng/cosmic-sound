@@ -1852,7 +1852,10 @@ a:hover { text-decoration: underline; }
     .now-playing-art {
         width: min(280px, 65vw) !important;
         height: min(280px, 65vw) !important;
-        margin-bottom: 1.2rem;
+        margin: 0 auto 1.2rem !important;
+        display: block !important;
+        border-radius: 12px;
+        aspect-ratio: 1 / 1 !important;
     }
     .now-playing-info { text-align: center; }
     .now-playing-title { font-size: 1.2rem; }
