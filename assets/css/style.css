@@ -1495,6 +1495,8 @@ a:hover { text-decoration: underline; }
 }
 .sidebar-overlay.show { display: block; }
 
+.np-lyrics-section { display: none; }
+
 /* ===== TABLET ===== */
 @media (max-width: 1024px) {
     .song-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1rem; }
@@ -2455,9 +2457,6 @@ a:hover { text-decoration: underline; }
 }
 
 /* NP Artist Section */
-.np-lyrics-section {
-    display: none;
-}
 .np-artist-section {
     width: 100%;
     background: rgba(255,255,255,0.05);
