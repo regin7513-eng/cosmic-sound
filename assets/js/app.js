@@ -1131,6 +1131,37 @@ function refreshGridNow() {
             }
         }
     });
+    updateSearchNowPlaying();
+}
+
+function updateSearchNowPlaying() {
+    if (!currentSong) return;
+    var recentView = document.getElementById('search-recent-view');
+    if (recentView && recentView.style.display !== 'none') {
+        document.querySelectorAll('#search-recent-list .search-recent-item').forEach(function(el) {
+            var isActive = el.classList.contains('now-playing');
+            var songId = el.getAttribute('onclick')?.match(/playRecentSong\('(.+?)'\)/)?.[1];
+            var shouldHighlight = songId === currentSong.id;
+            if (shouldHighlight !== isActive) {
+                showRecentSearches();
+            }
+        });
+    }
+    document.querySelectorAll('#mobile-search-list .search-result-item').forEach(function(el) {
+        var songId = el.getAttribute('onclick')?.match(/playSongFromSearchResult\('(.+?)'\)/)?.[1];
+        var shouldHighlight = songId === currentSong.id;
+        if (shouldHighlight) {
+            el.classList.add('now-playing');
+            var title = el.querySelector('.search-result-title');
+            if (title && !title.querySelector('.now-playing-bars-sm')) {
+                title.insertAdjacentHTML('beforeend', '<div class="now-playing-bars-sm"><span></span><span></span><span></span></div>');
+            }
+        } else {
+            el.classList.remove('now-playing');
+            var bars = el.querySelector('.now-playing-bars-sm');
+            if (bars) bars.remove();
+        }
+    });
 }
 
 function fmt(s) {
