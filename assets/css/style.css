@@ -1664,13 +1664,20 @@ a:hover { text-decoration: underline; }
     .player-info p { font-size: 0.6rem; }
 
     .player-center {
-        max-width: none;
-        flex: 0;
+        flex: 0 0 auto;
+        width: auto;
         gap: 0;
         padding: 0 0.25rem;
     }
 
-    .player-controls { gap: 0.3rem; }
+    .player-controls { gap: 0.3rem; display: flex; align-items: center; }
+
+    .control-btn { min-width: 36px; min-height: 36px; padding: 0; }
+
+    .control-btn, .np-ctrl-btn, .np-play-btn {
+        min-width: 44px;
+        min-height: 44px;
+    }
 
     .track-list-header { display: none; }
     .track-album { display: none; }
@@ -2553,8 +2560,6 @@ a:hover { text-decoration: underline; }
 
 /* ===== MOBILE EMERGENCY OVERRIDE (last rule wins) ===== */
 @media (max-width: 768px) {
-    .now-playing-overlay,
-    .now-playing-overlay.np-collapsed,
     .now-playing-overlay:not(.np-mobile-active) {
         display: none !important;
         width: 0 !important;
@@ -2564,6 +2569,11 @@ a:hover { text-decoration: underline; }
         border-left: none !important;
         padding: 0 !important;
         margin: 0 !important;
+    }
+    .now-playing-overlay.np-collapsed {
+        display: none !important;
+        width: 0 !important;
+        height: 0 !important;
     }
     .main-content {
         margin-right: 0 !important;
