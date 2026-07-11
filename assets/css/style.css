@@ -1828,6 +1828,9 @@ a:hover { text-decoration: underline; }
     #section-search .artist-grid::-webkit-scrollbar { display: none; }
     #section-search .artist-card {
         flex: 0 0 110px;
+        min-width: 110px;
+        max-width: 110px;
+        width: 110px;
         scroll-snap-align: start;
         background: rgba(255,255,255,0.04);
         border-radius: 10px;
@@ -1835,6 +1838,7 @@ a:hover { text-decoration: underline; }
         padding: 0.6rem 0.4rem;
         text-align: center;
         transition: background 0.2s;
+        overflow: hidden;
     }
     #section-search .artist-card:active { background: rgba(255,255,255,0.1); }
     #section-search .artist-avatar {
@@ -2165,7 +2169,7 @@ a:hover { text-decoration: underline; }
 @media (max-width: 400px) {
     .song-grid { grid-template-columns: repeat(2, 1fr); gap: 0.4rem; }
     #section-search .artist-grid { gap: 0.5rem; }
-    #section-search .artist-card { flex: 0 0 100px; }
+    #section-search .artist-card { flex: 0 0 100px; min-width: 100px; max-width: 100px; width: 100px; }
     #section-search .artist-avatar { width: 56px; height: 56px; }
     .section { padding: 0.4rem 0.6rem; }
     .tab-btn { padding: 0.25rem 0.5rem; font-size: 0.65rem; }
