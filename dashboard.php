@@ -210,10 +210,6 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'User');
                 <p id="player-artist">-</p>
             </div>
         </div>
-        <button class="np-expand-btn" onclick="openNpMobile()" title="Now Playing">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
-        </button>
-
         <div class="player-center">
             <div class="player-controls">
                 <button id="shuffle-btn" class="control-btn" title="Shuffle">

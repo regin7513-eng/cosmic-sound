@@ -1752,20 +1752,8 @@ a:hover { text-decoration: underline; }
     .main-content.np-collapsed { margin-right: 0 !important; }
 
     .player-bar .np-expand-btn {
-        display: flex !important;
-        align-items: center;
-        justify-content: center;
-        width: 36px;
-        height: 36px;
-        background: none;
-        border: none;
-        color: #fff;
-        cursor: pointer;
-        -webkit-tap-highlight-color: transparent;
-        flex-shrink: 0;
+        display: none !important;
     }
-
-    .player-bar .np-expand-btn:active { opacity: 0.5; }
 
     .lyrics-panel {
         left: 0; right: 0; bottom: 0; top: 0;
