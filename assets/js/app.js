@@ -1208,10 +1208,12 @@ function showRecentSearches() {
     if (!listEl) return;
     listEl.innerHTML = recentSongs.map(function(song, i) {
         var songId = esc(song.id).replace(/'/g, "\\'");
-        return '<div class="search-recent-item" onclick="playRecentSong(\'' + songId + '\')">' +
+        var isActive = currentSong && currentSong.id === song.id;
+        var barsHtml = isActive ? '<div class="now-playing-bars-sm"><span></span><span></span><span></span></div>' : '';
+        return '<div class="search-recent-item' + (isActive ? ' now-playing' : '') + '" onclick="playRecentSong(\'' + songId + '\')">' +
             '<img class="search-recent-cover" src="' + esc(song.cover_image) + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">' +
             '<div class="search-recent-info">' +
-                '<h4 class="search-recent-title">' + esc(song.title) + '</h4>' +
+                '<h4 class="search-recent-title">' + esc(song.title) + barsHtml + '</h4>' +
                 '<p class="search-recent-artist">' + esc(song.artist) + '</p>' +
             '</div>' +
             '<button class="search-recent-remove" onclick="event.stopPropagation(); removeRecentSong(\'' + songId + '\')">' +
@@ -1282,10 +1284,12 @@ function submitMobileSearch(query) {
 
 function searchResultHTML(song, i) {
     var songId = esc(song.id).replace(/'/g, "\\'");
-    return '<div class="search-result-item" onclick="playSongFromSearchResult(\'' + songId + '\')">' +
+    var isActive = currentSong && currentSong.id === song.id;
+    var barsHtml = isActive ? '<div class="now-playing-bars-sm"><span></span><span></span><span></span></div>' : '';
+    return '<div class="search-result-item' + (isActive ? ' now-playing' : '') + '" onclick="playSongFromSearchResult(\'' + songId + '\')">' +
         '<img class="search-result-cover" src="' + esc(song.cover_image) + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">' +
         '<div class="search-result-info">' +
-            '<h4 class="search-result-title">' + esc(song.title) + '</h4>' +
+            '<h4 class="search-result-title">' + esc(song.title) + barsHtml + '</h4>' +
             '<p class="search-result-artist">' + esc(song.artist) + '</p>' +
         '</div>' +
         '<button class="search-result-more" onclick="event.stopPropagation(); showContextMenu(event, findSongById(\'' + songId + '\'))">' +
