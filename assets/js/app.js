@@ -1130,38 +1130,74 @@ function onMobileSearchInput(q) {
     clearTimeout(mobileSearchTimeout);
     var defaultView = document.getElementById('search-default-view');
     var resultsView = document.getElementById('search-results-view');
+    var suggestionsEl = document.getElementById('mobile-search-suggestions');
+    var listEl = document.getElementById('mobile-search-list');
     if (!q.trim()) {
         if (defaultView) defaultView.style.display = '';
         if (resultsView) resultsView.style.display = 'none';
+        if (suggestionsEl) suggestionsEl.innerHTML = '';
+        if (listEl) listEl.innerHTML = '';
         loadMobileExtras();
         return;
     }
     if (defaultView) defaultView.style.display = 'none';
     if (resultsView) resultsView.style.display = '';
-    mobileSearchTimeout = setTimeout(function() { searchMusicMobile(q); }, 400);
+
+    if (suggestionsEl) {
+        suggestionsEl.innerHTML = '<div class="search-suggestion-item" onclick="searchMusicMobile(\'' + esc(q).replace(/'/g, "\\'") + '\')">' +
+            '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
+            '<span>' + esc(q) + '</span>' +
+        '</div>';
+        if (listEl) listEl.innerHTML = '';
+    }
+
+    mobileSearchTimeout = setTimeout(function() { searchMusicMobile(q); }, 500);
+}
+
+function searchResultHTML(song, i) {
+    var idx = typeof i !== 'undefined' ? i : 0;
+    return '<div class="search-result-item" onclick="playSongFromSearchResult(' + idx + ')">' +
+        '<img class="search-result-cover" src="' + esc(song.cover_image) + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">' +
+        '<div class="search-result-info">' +
+            '<h4 class="search-result-title">' + esc(song.title) + '</h4>' +
+            '<p class="search-result-artist">' + esc(song.artist) + '</p>' +
+        '</div>' +
+        '<button class="search-result-more" onclick="event.stopPropagation(); showContextMenu(event, allKnownSongs[' + idx + '] || null)">' +
+            '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>' +
+        '</button>' +
+    '</div>';
+}
+
+function playSongFromSearchResult(index) {
+    if (index >= 0 && index < allSongs.length) {
+        currentSong = allSongs[index];
+        currentIndex = index;
+        allKnownSongs.forEach(function(s, i) { if (s.id === currentSong.id) currentIndex = i; });
+        allSongs = allKnownSongs;
+        playSongDirect();
+    }
 }
 
 async function searchMusicMobile(query) {
     if (!query.trim()) return;
-    var grid = document.getElementById('mobile-search-grid');
-    var title = document.getElementById('mobile-search-title');
-    if (!grid) return;
-    title.textContent = 'Results';
-    grid.innerHTML = '<div class="empty-state"><div class="loading-spinner"></div><h3 style="margin-top:1rem">Searching...</h3></div>';
+    var listEl = document.getElementById('mobile-search-list');
+    if (!listEl) return;
+    listEl.innerHTML = '<div class="search-loading"><div class="loading-spinner"></div></div>';
+    var suggestionsEl = document.getElementById('mobile-search-suggestions');
+    if (suggestionsEl) suggestionsEl.innerHTML = '';
     try {
-        const res = await fetch(API_BASE + '/sankavollerei.php?action=search&q=' + encodeURIComponent(query) + '&limit=18');
+        const res = await fetch(API_BASE + '/sankavollerei.php?action=search&q=' + encodeURIComponent(query) + '&limit=20');
         const data = await res.json();
         if (!data.success || !data.data || data.data.length === 0) {
-            grid.innerHTML = emptyState('No results', 'Try a different search term');
+            listEl.innerHTML = '<div class="search-empty"><p>No results found</p></div>';
             return;
         }
-        title.textContent = 'Results: "' + esc(query) + '"';
         allSongs = data.data;
         accumulateKnown(allSongs);
-        renderGrid(grid, allSongs);
+        listEl.innerHTML = allSongs.map(function(song, i) { return searchResultHTML(song, i); }).join('');
         preloadUrls(allSongs);
     } catch (e) {
-        grid.innerHTML = emptyState('Search failed', esc(e.message));
+        listEl.innerHTML = '<div class="search-empty"><p>Search failed</p></div>';
     }
 }
 

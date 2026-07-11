@@ -212,10 +212,8 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'User');
                 </div>
 
                 <div id="search-results-view" style="display:none">
-                    <div class="section-header">
-                        <h2 id="mobile-search-title">Results</h2>
-                    </div>
-                    <div class="song-grid" id="mobile-search-grid"></div>
+                    <div id="mobile-search-suggestions"></div>
+                    <div id="mobile-search-list"></div>
                 </div>
             </div>
 
