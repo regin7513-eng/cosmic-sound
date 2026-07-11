@@ -1399,7 +1399,17 @@ document.addEventListener('click', function(e) {
     if (menu && !menu.contains(e.target) && avatar && !avatar.contains(e.target)) {
         menu.classList.remove('active');
     }
+    var sMenu = document.getElementById('sidebar-user-menu');
+    var sInfo = document.getElementById('sidebar-user-info');
+    if (sMenu && sInfo && !sInfo.contains(e.target)) {
+        sMenu.classList.remove('active');
+    }
 });
+
+function toggleSidebarUserMenu() {
+    var menu = document.getElementById('sidebar-user-menu');
+    if (menu) menu.classList.toggle('active');
+}
 
 function toggleNpCollapse() {
     var np = document.getElementById('now-playing-overlay');

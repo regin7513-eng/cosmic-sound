@@ -89,16 +89,24 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'User');
             </div>
 
             <div class="sidebar-footer">
-                <div class="user-info">
+                <div class="user-info" onclick="toggleSidebarUserMenu()" id="sidebar-user-info" style="cursor:pointer;position:relative;">
                     <div class="user-avatar"><?php echo strtoupper(substr($username, 0, 1)); ?></div>
                     <div class="user-details">
                         <span class="user-name"><?php echo $username; ?></span>
                         <span class="user-label">Premium</span>
                     </div>
+                    <div class="sidebar-user-menu" id="sidebar-user-menu">
+                        <div class="user-menu-email"><?php echo htmlspecialchars($_SESSION['email'] ?? ''); ?></div>
+                        <button class="user-menu-item" onclick="event.stopPropagation(); addAccount()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                            Add Account
+                        </button>
+                        <button class="user-menu-item user-menu-logout" onclick="event.stopPropagation(); handleLogout()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                            Logout
+                        </button>
+                    </div>
                 </div>
-                <button class="logout-btn" onclick="handleLogout()" title="Sign Out">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-                </button>
             </div>
         </nav>
         <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
