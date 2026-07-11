@@ -1218,27 +1218,36 @@ function submitMobileSearch(query) {
 }
 
 function searchResultHTML(song, i) {
-    var idx = typeof i !== 'undefined' ? i : 0;
-    return '<div class="search-result-item" onclick="playSongFromSearchResult(' + idx + ')">' +
+    var songId = esc(song.id).replace(/'/g, "\\'");
+    return '<div class="search-result-item" onclick="playSongFromSearchResult(\'' + songId + '\')">' +
         '<img class="search-result-cover" src="' + esc(song.cover_image) + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">' +
         '<div class="search-result-info">' +
             '<h4 class="search-result-title">' + esc(song.title) + '</h4>' +
             '<p class="search-result-artist">' + esc(song.artist) + '</p>' +
         '</div>' +
-        '<button class="search-result-more" onclick="event.stopPropagation(); showContextMenu(event, allKnownSongs[' + idx + '] || null)">' +
+        '<button class="search-result-more" onclick="event.stopPropagation(); showContextMenu(event, findSongById(\'' + songId + '\'))">' +
             '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>' +
         '</button>' +
     '</div>';
 }
 
-function playSongFromSearchResult(index) {
-    if (index >= 0 && index < allSongs.length) {
-        currentSong = allSongs[index];
-        currentIndex = index;
-        allKnownSongs.forEach(function(s, i) { if (s.id === currentSong.id) currentIndex = i; });
-        allSongs = allKnownSongs;
-        playSongDirect();
+function findSongById(id) {
+    for (var i = 0; i < allKnownSongs.length; i++) {
+        if (allKnownSongs[i].id === id) return allKnownSongs[i];
     }
+    return null;
+}
+
+function playSongFromSearchResult(songId) {
+    var song = null;
+    var idx = -1;
+    for (var i = 0; i < allSongs.length; i++) {
+        if (allSongs[i].id === songId) { song = allSongs[i]; idx = i; break; }
+    }
+    if (!song) return;
+    currentSong = song;
+    currentIndex = idx;
+    playSongDirect();
 }
 
 async function searchMusicMobile(query) {
