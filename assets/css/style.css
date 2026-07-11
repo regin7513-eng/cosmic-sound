@@ -25,14 +25,13 @@
     --player-height: 80px;
 }
 
-html { font-size: 16px; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+html { font-size: 16px; -webkit-font-smoothing: antialiased; }
 
 body {
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     background: var(--bg-base);
     color: var(--text);
     min-height: 100vh;
-    overflow-x: hidden;
 }
 
 h1, h2, h3, h4 { font-weight: 700; letter-spacing: -0.02em; }
@@ -452,7 +451,7 @@ a:hover { text-decoration: underline; }
 .main-content {
     background: #0a0014;
     overflow-y: auto;
-    overflow-x: hidden;
+    overflow-x: clip;
     padding: 0;
     display: flex;
     flex-direction: column;
@@ -1587,8 +1586,7 @@ a:hover { text-decoration: underline; }
         --bottom-nav-height: 60px;
     }
 
-    body { -webkit-tap-highlight-color: transparent; touch-action: pan-y; overscroll-behavior-y: none; }
-    html { overscroll-behavior: none; }
+    body { -webkit-tap-highlight-color: transparent; }
     * { -webkit-tap-highlight-color: transparent; }
 
     .mobile-menu-btn { display: none; }
@@ -2972,8 +2970,8 @@ a:hover { text-decoration: underline; }
     .main-content {
         margin-right: 0 !important;
         width: 100% !important;
-        max-width: 100vw !important;
-        overflow-x: hidden !important;
+        max-width: 100% !important;
+        overflow-x: clip !important;
     }
     .main-content.np-collapsed {
         margin-right: 0 !important;
