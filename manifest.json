@@ -1,0 +1,10 @@
+{
+    "name": "Ginz Song",
+    "short_name": "Ginz Song",
+    "start_url": "dashboard.php",
+    "display": "standalone",
+    "background_color": "#0a0014",
+    "theme_color": "#0a0014",
+    "orientation": "any",
+    "icons": []
+}

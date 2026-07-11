@@ -169,8 +169,9 @@ function initPlayer() {
 
     audio.volume = 0.7;
     audio.preload = 'auto';
+    audio.setAttribute('playsinline', '');
     document.getElementById('volume-slider').style.setProperty('--vol-pct', '70%');
-    audio.addEventListener('timeupdate', () => { updateProgress(); updateLyricsHighlight(); updateNpLyricsHighlight(); });
+    audio.addEventListener('timeupdate', () => { updateProgress(); updateLyricsHighlight(); updateNpLyricsHighlight(); updateMediaSessionPosition(); });
     audio.addEventListener('loadedmetadata', updateDuration);
     audio.addEventListener('play', () => { isPlaying = true; updatePlayButton(); refreshGrid(); updateMediaSessionState(); });
     audio.addEventListener('pause', () => { isPlaying = false; updatePlayButton(); refreshGrid(); updateMediaSessionState(); });
@@ -184,6 +185,12 @@ function initPlayer() {
         navigator.mediaSession.setActionHandler('nexttrack', playNext);
         navigator.mediaSession.setActionHandler('seekto', function(e) {
             if (e.seekTime != null) audio.currentTime = e.seekTime;
+        });
+        navigator.mediaSession.setActionHandler('seekbackward', function(e) {
+            audio.currentTime = Math.max(0, audio.currentTime - (e.seekOffset || 10));
+        });
+        navigator.mediaSession.setActionHandler('seekforward', function(e) {
+            audio.currentTime = Math.min(audio.duration || 0, audio.currentTime + (e.seekOffset || 10));
         });
     }
 }
@@ -866,23 +873,45 @@ function handleSongEnd() {
 function updateMediaSessionState() {
     if (!('mediaSession' in navigator)) return;
     navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
+    updateMediaSessionPosition();
+}
+
+function updateMediaSessionPosition() {
+    if (!('mediaSession' in navigator) || !audio || isNaN(audio.duration)) return;
+    try {
+        navigator.mediaSession.setPositionState({
+            duration: audio.duration || 0,
+            playbackRate: audio.playbackRate || 1,
+            position: audio.currentTime || 0
+        });
+    } catch(e) {}
 }
 
 function updateMediaSessionMetadata() {
     if (!('mediaSession' in navigator) || !currentSong) return;
+    var artUrl = currentSong.cover_image || '';
+    var artwork = [];
+    if (artUrl) {
+        artwork = [
+            { src: artUrl, sizes: '96x96', type: 'image/jpeg' },
+            { src: artUrl, sizes: '128x128', type: 'image/jpeg' },
+            { src: artUrl, sizes: '192x192', type: 'image/jpeg' },
+            { src: artUrl, sizes: '256x256', type: 'image/jpeg' },
+            { src: artUrl, sizes: '512x512', type: 'image/jpeg' }
+        ];
+    }
     navigator.mediaSession.metadata = new MediaMetadata({
         title: currentSong.title || 'Unknown',
         artist: currentSong.artist || 'Unknown',
-        album: currentSong.album || '',
-        artwork: currentSong.cover_image ? [
-            { src: currentSong.cover_image, sizes: '512x512', type: 'image/jpeg' }
-        ] : []
+        album: currentSong.album || 'Ginz Song',
+        artwork: artwork
     });
 }
 
 document.addEventListener('visibilitychange', function() {
-    if (document.hidden && isPlaying && audio && !audio.paused) {
-        audio.play().catch(function() {});
+    if (isPlaying && audio && !audio.paused) {
+        updateMediaSessionState();
+        updateMediaSessionPosition();
     }
 });
 
