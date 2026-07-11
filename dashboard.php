@@ -1,4 +1,7 @@
 <?php require_once __DIR__ . '/config/session.php';
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
+header('Expires: 0');
 if (!isset($_SESSION['user_id'])) { header('Location: login.php'); exit(); }
 $username = htmlspecialchars($_SESSION['username'] ?? 'User');
 ?>
@@ -9,6 +12,11 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'User');
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
     <title>Ginz Song</title>
     <link rel="stylesheet" href="assets/css/style.css">
+    <script>
+    window.addEventListener('pageshow', function(e) {
+        if (e.persisted) { window.location.reload(); }
+    });
+    </script>
 </head>
 <body>
     <div class="dashboard">
