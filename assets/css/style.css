@@ -1818,7 +1818,24 @@ a:hover { text-decoration: underline; }
     }
     .mobile-search-cancel:active { color: var(--primary); }
     #section-search { display: none !important; }
-    #section-search.active { display: block !important; }
+    #section-search.active {
+        display: block !important;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: calc(var(--player-height) + var(--bottom-nav-height));
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        z-index: 50;
+        background: var(--bg-base);
+        padding-top: env(safe-area-inset-top, 0);
+    }
+    #section-search .mobile-search-header {
+        position: sticky;
+        top: env(safe-area-inset-top, 0);
+        z-index: 10;
+    }
 
     .section-header { padding: 0; margin-bottom: 0.4rem; }
     .section-header h2 { font-size: 1rem; font-weight: 700; }
