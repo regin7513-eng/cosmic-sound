@@ -1379,6 +1379,20 @@ function isMobile() {
     return window.innerWidth <= 768;
 }
 
+function toggleUserMenu() {
+    var menu = document.getElementById('user-menu-dropdown');
+    if (!menu) return;
+    menu.classList.toggle('active');
+}
+
+document.addEventListener('click', function(e) {
+    var menu = document.getElementById('user-menu-dropdown');
+    var avatar = document.getElementById('header-avatar');
+    if (menu && !menu.contains(e.target) && avatar && !avatar.contains(e.target)) {
+        menu.classList.remove('active');
+    }
+});
+
 function toggleNpCollapse() {
     var np = document.getElementById('now-playing-overlay');
     var main = document.querySelector('.main-content');
