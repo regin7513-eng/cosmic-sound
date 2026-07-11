@@ -201,7 +201,16 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'User');
             <!-- Section: Search (mobile only) -->
             <div id="section-search" class="section">
                 <div class="mobile-search-box">
-                    <input type="text" id="mobile-search-input" class="mobile-search-input" placeholder="What do you want to listen to?" oninput="onMobileSearchInput(this.value)">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;color:var(--text-muted)"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input type="text" id="mobile-search-input" class="mobile-search-input" placeholder="What do you want to listen to?" oninput="onMobileSearchInput(this.value)" onfocus="showRecentSearches()">
+                </div>
+
+                <div id="search-recent-view" style="display:none">
+                    <div class="search-recent-header">
+                        <h2>Recent Searches</h2>
+                        <button class="search-recent-clear" onclick="clearRecentSearches()">Clear all</button>
+                    </div>
+                    <div id="search-recent-list"></div>
                 </div>
 
                 <div id="search-default-view">

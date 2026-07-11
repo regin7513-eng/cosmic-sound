@@ -115,11 +115,14 @@ function mobileNav(section, btn) {
             if (searchSection) searchSection.classList.add('active');
             var defaultView = document.getElementById('search-default-view');
             var resultsView = document.getElementById('search-results-view');
+            var recentView = document.getElementById('search-recent-view');
             if (defaultView) defaultView.style.display = '';
             if (resultsView) resultsView.style.display = 'none';
+            if (recentView) recentView.style.display = 'none';
             loadMobileExtras();
             var searchInput = document.getElementById('mobile-search-input');
-            if (searchInput) { searchInput.value = ''; searchInput.focus(); }
+            if (searchInput) { searchInput.value = ''; }
+            showRecentSearches();
         } else {
             document.getElementById('search-input')?.focus();
         }
@@ -1125,11 +1128,65 @@ function onSearchInput(q) {
     searchTimeout = setTimeout(function() { searchMusic(q); }, 600);
 }
 
+function getRecentSearches() {
+    try { return JSON.parse(localStorage.getItem('ginz_recent_searches') || '[]'); } catch(e) { return []; }
+}
+function addRecentSearch(query) {
+    var searches = getRecentSearches().filter(function(s) { return s !== query; });
+    searches.unshift(query);
+    if (searches.length > 10) searches = searches.slice(0, 10);
+    localStorage.setItem('ginz_recent_searches', JSON.stringify(searches));
+}
+function clearRecentSearches() {
+    localStorage.removeItem('ginz_recent_searches');
+    var recentView = document.getElementById('search-recent-view');
+    if (recentView) recentView.style.display = 'none';
+}
+function removeRecentSearch(query) {
+    var searches = getRecentSearches().filter(function(s) { return s !== query; });
+    localStorage.setItem('ginz_recent_searches', JSON.stringify(searches));
+    showRecentSearches();
+}
+function showRecentSearches() {
+    var q = document.getElementById('mobile-search-input')?.value || '';
+    if (q.trim()) return;
+    var searches = getRecentSearches();
+    var recentView = document.getElementById('search-recent-view');
+    var defaultView = document.getElementById('search-default-view');
+    var resultsView = document.getElementById('search-results-view');
+    if (!recentView) return;
+    if (searches.length === 0) {
+        recentView.style.display = 'none';
+        if (defaultView) defaultView.style.display = '';
+        return;
+    }
+    if (defaultView) defaultView.style.display = 'none';
+    if (resultsView) resultsView.style.display = 'none';
+    recentView.style.display = '';
+    var listEl = document.getElementById('search-recent-list');
+    if (!listEl) return;
+    listEl.innerHTML = searches.map(function(s) {
+        return '<div class="search-recent-item" onclick="selectRecentSearch(\'' + esc(s).replace(/'/g, "\\'") + '\')">' +
+            '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' +
+            '<span class="search-recent-text">' + esc(s) + '</span>' +
+            '<button class="search-recent-remove" onclick="event.stopPropagation(); removeRecentSearch(\'' + esc(s).replace(/'/g, "\\'") + '\')">' +
+                '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
+            '</button>' +
+        '</div>';
+    }).join('');
+}
+function selectRecentSearch(query) {
+    var input = document.getElementById('mobile-search-input');
+    if (input) { input.value = query; input.focus(); }
+    onMobileSearchInput(query);
+}
+
 var mobileSearchTimeout;
 function onMobileSearchInput(q) {
     clearTimeout(mobileSearchTimeout);
     var defaultView = document.getElementById('search-default-view');
     var resultsView = document.getElementById('search-results-view');
+    var recentView = document.getElementById('search-recent-view');
     var suggestionsEl = document.getElementById('mobile-search-suggestions');
     var listEl = document.getElementById('mobile-search-list');
     if (!q.trim()) {
@@ -1137,14 +1194,15 @@ function onMobileSearchInput(q) {
         if (resultsView) resultsView.style.display = 'none';
         if (suggestionsEl) suggestionsEl.innerHTML = '';
         if (listEl) listEl.innerHTML = '';
-        loadMobileExtras();
+        showRecentSearches();
         return;
     }
     if (defaultView) defaultView.style.display = 'none';
+    if (recentView) recentView.style.display = 'none';
     if (resultsView) resultsView.style.display = '';
 
     if (suggestionsEl) {
-        suggestionsEl.innerHTML = '<div class="search-suggestion-item" onclick="searchMusicMobile(\'' + esc(q).replace(/'/g, "\\'") + '\')">' +
+        suggestionsEl.innerHTML = '<div class="search-suggestion-item" onclick="submitMobileSearch(\'' + esc(q).replace(/'/g, "\\'") + '\')">' +
             '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
             '<span>' + esc(q) + '</span>' +
         '</div>';
@@ -1152,6 +1210,11 @@ function onMobileSearchInput(q) {
     }
 
     mobileSearchTimeout = setTimeout(function() { searchMusicMobile(q); }, 500);
+}
+
+function submitMobileSearch(query) {
+    addRecentSearch(query);
+    searchMusicMobile(query);
 }
 
 function searchResultHTML(song, i) {
@@ -1192,6 +1255,7 @@ async function searchMusicMobile(query) {
             listEl.innerHTML = '<div class="search-empty"><p>No results found</p></div>';
             return;
         }
+        addRecentSearch(query);
         allSongs = data.data;
         accumulateKnown(allSongs);
         listEl.innerHTML = allSongs.map(function(song, i) { return searchResultHTML(song, i); }).join('');

@@ -1875,6 +1875,43 @@ a:hover { text-decoration: underline; }
     }
     #section-search .song-grid { grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
 
+    .search-recent-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+    }
+    .search-recent-header h2 { font-size: 0.9rem; font-weight: 700; }
+    .search-recent-clear {
+        background: none; border: none; color: var(--text-muted);
+        font-size: 0.72rem; cursor: pointer; padding: 0.3rem 0;
+    }
+    .search-recent-clear:active { color: var(--primary); }
+    .search-recent-item {
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+        padding: 0.55rem 0;
+        border-bottom: 1px solid rgba(255,255,255,0.04);
+        cursor: pointer;
+    }
+    .search-recent-item:active { opacity: 0.6; }
+    .search-recent-item svg { flex-shrink: 0; color: var(--text-muted); }
+    .search-recent-text {
+        flex: 1;
+        font-size: 0.82rem;
+        color: var(--text);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .search-recent-remove {
+        background: none; border: none; color: var(--text-muted);
+        cursor: pointer; padding: 0.3rem; display: flex; align-items: center;
+        flex-shrink: 0;
+    }
+    .search-recent-remove:active { color: #ff4444; }
+
     .search-suggestion-item {
         display: flex;
         align-items: center;
