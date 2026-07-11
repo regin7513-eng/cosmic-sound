@@ -1816,15 +1816,23 @@ a:hover { text-decoration: underline; }
     .song-card-artist { font-size: 0.65rem; padding: 0 0.4rem 0.35rem; }
 
     #section-search .artist-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 0.5rem;
+        display: flex;
+        overflow-x: auto;
+        overflow-y: hidden;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        gap: 0.6rem;
+        padding-bottom: 0.5rem;
+        scrollbar-width: none;
     }
+    #section-search .artist-grid::-webkit-scrollbar { display: none; }
     #section-search .artist-card {
+        flex: 0 0 110px;
+        scroll-snap-align: start;
         background: rgba(255,255,255,0.04);
-        border-radius: 8px;
+        border-radius: 10px;
         cursor: pointer;
-        padding: 0.6rem 0.3rem;
+        padding: 0.6rem 0.4rem;
         text-align: center;
         transition: background 0.2s;
     }
@@ -2156,8 +2164,9 @@ a:hover { text-decoration: underline; }
 /* ===== SMALL PHONES (iPhone SE, etc) ===== */
 @media (max-width: 400px) {
     .song-grid { grid-template-columns: repeat(2, 1fr); gap: 0.4rem; }
-    #section-search .artist-grid { gap: 0.4rem; }
-    #section-search .artist-avatar { width: 40px; height: 40px; }
+    #section-search .artist-grid { gap: 0.5rem; }
+    #section-search .artist-card { flex: 0 0 100px; }
+    #section-search .artist-avatar { width: 56px; height: 56px; }
     .section { padding: 0.4rem 0.6rem; }
     .tab-btn { padding: 0.25rem 0.5rem; font-size: 0.65rem; }
     .song-card-title { font-size: 0.68rem; }
