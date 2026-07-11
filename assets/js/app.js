@@ -99,8 +99,10 @@ function toggleSidebar() {
     const sidebar = document.querySelector('.sidebar');
     const overlay = document.getElementById('sidebar-overlay');
     if (!sidebar) return;
+    var opening = !sidebar.classList.contains('open');
     sidebar.classList.toggle('open');
     if (overlay) overlay.classList.toggle('show', sidebar.classList.contains('open'));
+    if (isMobile() && opening) history.pushState({ sidebar: true }, '', '');
 }
 
 function mobileNav(section, btn) {
@@ -1359,13 +1361,31 @@ function restoreNpState() {
 
 function openNpMobile() {
     var np = document.getElementById('now-playing-overlay');
-    if (np && isMobile()) np.classList.add('np-mobile-active');
+    if (np && isMobile()) {
+        np.classList.add('np-mobile-active');
+        history.pushState({ np: true }, '', '');
+    }
 }
 
 function closeNpMobile() {
     var np = document.getElementById('now-playing-overlay');
     if (np && isMobile()) np.classList.remove('np-mobile-active');
 }
+
+window.addEventListener('popstate', function(e) {
+    if (isMobile()) {
+        var np = document.getElementById('now-playing-overlay');
+        if (np && np.classList.contains('np-mobile-active')) {
+            closeNpMobile();
+            return;
+        }
+        var sidebar = document.querySelector('.sidebar');
+        if (sidebar && sidebar.classList.contains('open')) {
+            toggleSidebar();
+            return;
+        }
+    }
+});
 
 function updateNowPlaying() {
     var emptyState = document.getElementById('np-empty-state');
