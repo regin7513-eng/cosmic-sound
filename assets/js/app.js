@@ -58,6 +58,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (document.querySelector('.song-grid')) loadPlaylist('trending');
 
+    setTimeout(prefetchPlaylists, 2000);
+
     document.addEventListener('click', (e) => {
         const menu = document.getElementById('context-menu');
         if (menu && !menu.contains(e.target) && !e.target.closest('.song-card-menu') && !e.target.closest('.song-action-btn')) {
@@ -507,6 +509,38 @@ async function createPlaylist(e) {
 }
 
 var playlistCache = {};
+
+function prefetchPlaylists() {
+    var ids = ['chill', 'energy', 'romance', 'focus', 'party', 'sad', 'indie', 'hiphop', 'karaoke'];
+    var queries = {
+        'chill': 'lofi chill beats relaxing',
+        'energy': 'workout motivation pump up',
+        'romance': 'love songs romantic',
+        'focus': 'study music instrumental concentration',
+        'party': 'party dance hits club',
+        'sad': 'sad emotional heartbreak',
+        'indie': 'indie alternative chill',
+        'hiphop': 'hip hop rap best',
+        'karaoke': 'karaoke sing along popular'
+    };
+    var i = 0;
+    function next() {
+        if (i >= ids.length) return;
+        var batch = ids.slice(i, i + 3);
+        i += 3;
+        batch.forEach(function(id) {
+            if (playlistCache[id]) return;
+            var url = API_BASE + '/sankavollerei.php?action=search&q=' + encodeURIComponent(queries[id]) + '&limit=18&_t=' + Date.now();
+            fetch(url).then(function(r) { return r.json(); }).then(function(data) {
+                if (data.success && data.data && data.data.length > 0) {
+                    playlistCache[id] = data.data;
+                }
+            }).catch(function() {});
+        });
+        setTimeout(next, 800);
+    }
+    next();
+}
 
 async function loadPlaylist(id) {
     const grid = document.querySelector('#section-home .song-grid');
