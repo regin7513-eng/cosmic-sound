@@ -2412,13 +2412,14 @@ a:hover { text-decoration: underline; }
     display: flex;
     flex-direction: column;
     transform: translateX(110%);
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s 0.3s;
     border-radius: 8px;
     box-shadow: 0 16px 48px rgba(255,45,149,0.15), 0 0 0 1px rgba(255,45,149,0.12);
     overflow: hidden;
+    visibility: hidden;
 }
 
-.queue-panel.active { transform: translateX(0); }
+.queue-panel.active { transform: translateX(0); visibility: visible; }
 
 .queue-header {
     display: flex;
