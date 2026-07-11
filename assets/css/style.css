@@ -1766,8 +1766,21 @@ a:hover { text-decoration: underline; }
     }
     .mobile-home-extras .artist-grid,
     .mobile-library-extras .artist-grid {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 0.5rem;
+        display: flex;
+        overflow-x: auto;
+        overflow-y: hidden;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        gap: 0.6rem;
+        padding-bottom: 0.5rem;
+        scrollbar-width: none;
+    }
+    .mobile-home-extras .artist-grid::-webkit-scrollbar,
+    .mobile-library-extras .artist-grid::-webkit-scrollbar { display: none; }
+    .mobile-home-extras .artist-card,
+    .mobile-library-extras .artist-card {
+        flex: 0 0 100px;
+        scroll-snap-align: start;
     }
     .mobile-home-extras .song-grid,
     .mobile-library-extras .song-grid {
@@ -1845,11 +1858,17 @@ a:hover { text-decoration: underline; }
     .song-card-artist { font-size: 0.65rem; padding: 0 0.4rem 0.35rem; }
 
     .artist-grid {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 0.5rem;
+        display: flex;
+        overflow-x: auto;
+        overflow-y: hidden;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        gap: 0.6rem;
+        padding-bottom: 0.5rem;
+        scrollbar-width: none;
     }
-
-    .artist-card { padding: 0.5rem; border-radius: 8px; }
+    .artist-grid::-webkit-scrollbar { display: none; }
+    .artist-card { flex: 0 0 100px; scroll-snap-align: start; padding: 0.5rem; border-radius: 8px; }
     .artist-name { font-size: 0.68rem; }
     .artist-label { font-size: 0.58rem; }
 
@@ -2146,7 +2165,7 @@ a:hover { text-decoration: underline; }
 /* ===== SMALL PHONES (iPhone SE, etc) ===== */
 @media (max-width: 400px) {
     .song-grid { grid-template-columns: repeat(2, 1fr); gap: 0.4rem; }
-    .artist-grid { grid-template-columns: repeat(3, 1fr); gap: 0.4rem; }
+    .artist-grid { gap: 0.4rem; }
     .section { padding: 0.4rem 0.6rem; }
     .tab-btn { padding: 0.25rem 0.5rem; font-size: 0.65rem; }
     .song-card-title { font-size: 0.68rem; }
