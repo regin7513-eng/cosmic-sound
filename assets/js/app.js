@@ -802,12 +802,14 @@ function fetchDownloadUrl(trackUrl) {
 
 function playWithUrl(mp3Url, myId) {
     if (myId !== currentSongId) return;
+    updateMediaSessionMetadata();
     audio.src = mp3Url;
     audio.load();
     audio.play().then(function() {
         if (myId === currentSongId) {
             addToRecent(currentSong);
-            updateMediaSessionMetadata();
+            updateMediaSessionState();
+            startBgKeepAlive();
         }
     }).catch(function() {
         if (myId === currentSongId) showToast('Unable to play this track');
@@ -876,6 +878,22 @@ function updateMediaSessionMetadata() {
             { src: currentSong.cover_image, sizes: '512x512', type: 'image/jpeg' }
         ] : []
     });
+}
+
+document.addEventListener('visibilitychange', function() {
+    if (document.hidden && isPlaying && audio && !audio.paused) {
+        audio.play().catch(function() {});
+    }
+});
+
+var bgKeepAliveTimer;
+function startBgKeepAlive() {
+    clearInterval(bgKeepAliveTimer);
+    bgKeepAliveTimer = setInterval(function() {
+        if (isPlaying && audio && !audio.paused) {
+            updateMediaSessionState();
+        }
+    }, 25000);
 }
 
 function seek(e) {
