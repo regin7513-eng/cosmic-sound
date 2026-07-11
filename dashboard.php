@@ -213,12 +213,6 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'User');
         <button class="np-expand-btn" onclick="openNpMobile()" title="Now Playing">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
         </button>
-            <img id="player-cover-img" src="" alt="">
-            <div class="player-info-text">
-                <h4 id="player-title">Not Playing</h4>
-                <p id="player-artist">-</p>
-            </div>
-        </div>
 
         <div class="player-center">
             <div class="player-controls">

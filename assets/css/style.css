@@ -1606,9 +1606,11 @@ a:hover { text-decoration: underline; }
         border-radius: 8px;
         background: rgba(255,255,255,0.04);
         transition: transform 0.15s;
+        overflow: hidden;
+        align-self: start;
     }
     .song-card:active { transform: scale(0.96); }
-    .song-card-cover { border-radius: 8px; aspect-ratio: 1; padding-top: 0; margin-bottom: 0.4rem; }
+    .song-card-cover { border-radius: 8px; padding-top: 0; margin-bottom: 0.4rem; aspect-ratio: 1 / 1; overflow: hidden; }
     .song-card-title { font-size: 0.72rem; font-weight: 600; padding: 0.35rem 0.4rem 0; }
     .song-card-artist { font-size: 0.65rem; padding: 0 0.4rem 0.35rem; }
 
