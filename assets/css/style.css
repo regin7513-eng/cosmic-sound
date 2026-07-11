@@ -405,15 +405,48 @@ a:hover { text-decoration: underline; }
     bottom: 100%;
     left: 0;
     right: 0;
-    background: #1a1030;
+    background: var(--bg-elevated);
     border: 1px solid var(--border);
     border-radius: 12px;
     padding: 0.5rem 0;
     margin-bottom: 0.5rem;
     z-index: 300;
-    box-shadow: 0 -8px 32px rgba(0,0,0,0.6);
+    box-shadow: 0 -8px 32px rgba(0,0,0,0.6), 0 0 20px rgba(255,45,149,0.1);
+    overflow: hidden;
 }
 .sidebar-user-menu.active { display: block; }
+.sidebar-user-menu .user-menu-email {
+    padding: 0.6rem 1rem;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 0.25rem;
+    word-break: break-all;
+}
+.sidebar-user-menu .user-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    width: 100%;
+    padding: 0.6rem 1rem;
+    background: none;
+    border: none;
+    color: var(--text);
+    font-size: 0.82rem;
+    font-family: inherit;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.15s;
+}
+.sidebar-user-menu .user-menu-item:hover {
+    background: rgba(255,255,255,0.06);
+}
+.sidebar-user-menu .user-menu-logout {
+    color: #ff4d6a;
+}
+.sidebar-user-menu .user-menu-logout:hover {
+    background: rgba(255,77,106,0.1);
+}
 
 /* ===== MAIN CONTENT ===== */
 .main-content {
@@ -1640,17 +1673,18 @@ a:hover { text-decoration: underline; }
         position: absolute;
         top: 40px;
         left: 0;
-        background: #1a1030;
+        background: var(--bg-elevated);
         border: 1px solid var(--border);
         border-radius: 12px;
         padding: 0.5rem 0;
         min-width: 220px;
         z-index: 300;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+        box-shadow: 0 8px 32px rgba(0,0,0,0.6), 0 0 20px rgba(255,45,149,0.1);
+        overflow: hidden;
     }
     .user-menu-dropdown.active { display: block; }
     .user-menu-email {
-        padding: 0.5rem 1rem;
+        padding: 0.6rem 1rem;
         font-size: 0.72rem;
         color: var(--text-muted);
         border-bottom: 1px solid var(--border);
@@ -1662,7 +1696,7 @@ a:hover { text-decoration: underline; }
         align-items: center;
         gap: 0.6rem;
         width: 100%;
-        padding: 0.6rem 1rem;
+        padding: 0.65rem 1rem;
         background: none;
         border: none;
         color: var(--text);
@@ -1670,10 +1704,13 @@ a:hover { text-decoration: underline; }
         font-family: inherit;
         cursor: pointer;
         text-align: left;
+        transition: background 0.15s;
         -webkit-tap-highlight-color: transparent;
     }
-    .user-menu-item:active { background: rgba(255,255,255,0.06); }
+    .user-menu-item:hover { background: rgba(255,255,255,0.06); }
+    .user-menu-item:active { background: rgba(255,255,255,0.1); }
     .user-menu-logout { color: #ff4d6a; }
+    .user-menu-logout:hover { background: rgba(255,77,106,0.1); }
 
     .header-greeting h1 { font-size: 1rem; font-weight: 800; }
 
