@@ -265,15 +265,17 @@ async function toggleFavorite(song) {
     if (wasFav) {
         favoriteIds.delete(song.id);
         try {
-            await fetch(API_BASE + '/favorites.php?track_id=' + encodeURIComponent(song.id), {
+            var r = await fetch(API_BASE + '/favorites.php?track_id=' + encodeURIComponent(song.id), {
                 method: 'DELETE', credentials: 'same-origin'
             });
-        } catch {}
+            var rd = await r.json();
+            if (!rd.success) console.error('Favorite delete failed:', rd);
+        } catch (err) { console.error('Favorite delete error:', err); }
         showToast('Removed from Favorites');
     } else {
         favoriteIds.add(song.id);
         try {
-            await fetch(API_BASE + '/favorites.php', {
+            var r = await fetch(API_BASE + '/favorites.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'same-origin',
@@ -284,7 +286,9 @@ async function toggleFavorite(song) {
                     duration_text: song.duration_text
                 })
             });
-        } catch {}
+            var rd = await r.json();
+            if (!rd.success) console.error('Favorite add failed:', rd);
+        } catch (err) { console.error('Favorite add error:', err); }
         showToast('Added to Favorites');
     }
 
