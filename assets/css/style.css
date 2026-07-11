@@ -427,6 +427,10 @@ a:hover { text-decoration: underline; }
     border-bottom: none;
 }
 
+.mobile-header-left,
+.mobile-header-right { display: none; }
+.header-avatar { display: none; }
+
 .header-greeting h1 {
     font-size: 1.25rem;
     font-weight: 700;
@@ -1554,12 +1558,60 @@ a:hover { text-decoration: underline; }
     .main-header {
         flex-direction: row;
         align-items: center;
+        justify-content: space-between;
         gap: 0.5rem;
         padding: 0.5rem 0.75rem;
         position: sticky;
         top: 0;
         background: var(--bg-base);
         z-index: 10;
+    }
+
+    .mobile-header-left {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        min-width: 0;
+    }
+
+    .header-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary), var(--accent));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 0.75rem;
+        font-weight: 700;
+        flex-shrink: 0;
+    }
+
+    .mobile-header-right {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-shrink: 0;
+    }
+
+    .mobile-logout-btn {
+        background: rgba(255,255,255,0.06);
+        border: none;
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: all 0.2s;
+        -webkit-tap-highlight-color: transparent;
+    }
+    .mobile-logout-btn:active {
+        background: rgba(255,45,149,0.2);
+        color: var(--primary);
     }
 
     .header-greeting h1 { font-size: 1rem; font-weight: 800; }
