@@ -1574,6 +1574,9 @@ a:hover { text-decoration: underline; }
 @media (max-width: 1024px) {
     .song-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1rem; }
     .artist-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 1rem; }
+    .now-playing-overlay { width: 320px; }
+    .main-content.np-panel-open { margin-right: 320px; }
+    .lyrics-panel { left: var(--sidebar-width); }
 }
 
 /* ===== MOBILE (all phones) ===== */
@@ -1731,19 +1734,6 @@ a:hover { text-decoration: underline; }
     .user-menu-logout:hover { background: rgba(255,77,106,0.1); }
 
     .header-greeting h1 { font-size: 1rem; font-weight: 800; }
-
-    .search-container {
-        max-width: none;
-        flex: 1;
-    }
-
-    .search-input {
-        width: 100%;
-        padding: 0.45rem 0.6rem 0.45rem 2rem;
-        font-size: 0.78rem;
-        border-radius: 20px;
-        background: rgba(255,255,255,0.08);
-    }
 
     .playlist-tabs {
         gap: 0.35rem;
@@ -2141,6 +2131,7 @@ a:hover { text-decoration: underline; }
 
     .track-list-header { display: none; }
     .track-album { display: none; }
+    .track-item { grid-template-columns: 36px 1fr 50px; gap: 0.5rem; }
     .track-cover { width: 36px; height: 36px; }
     .track-title { font-size: 0.8rem; }
     .track-artist { font-size: 0.7rem; }
@@ -2149,7 +2140,7 @@ a:hover { text-decoration: underline; }
     .now-playing-overlay {
         position: fixed !important;
         inset: 0 !important;
-        width: 100vw !important;
+        width: 100% !important;
         height: 100dvh !important;
         right: 0 !important;
         bottom: 0 !important;
@@ -2295,6 +2286,7 @@ a:hover { text-decoration: underline; }
         top: auto !important;
         width: auto !important; max-width: none !important;
         border-radius: var(--radius-lg) !important;
+        z-index: 1100 !important;
     }
 
     .modal {
@@ -2304,11 +2296,15 @@ a:hover { text-decoration: underline; }
         overflow-y: auto;
     }
 
+    .toast-container {
+        bottom: calc(var(--player-height) + var(--bottom-nav-height) + 1rem);
+    }
+
     .auth-page { padding: 1rem; }
     .auth-card { padding: 1.5rem 1.25rem; }
 
     .queue-panel {
-        width: calc(100vw - 16px);
+        width: calc(100% - 16px);
         right: 8px; left: 8px; top: 8px;
         bottom: calc(var(--bottom-nav-height) + var(--player-height) + 8px);
         max-width: none;
@@ -2399,6 +2395,10 @@ a:hover { text-decoration: underline; }
     .player-info img { width: 36px; height: 36px; }
     .player-info h4 { font-size: 0.65rem; }
     .player-info p { font-size: 0.55rem; }
+    .player-controls { gap: 0.15rem; }
+    .control-btn { min-width: 32px !important; min-height: 32px !important; }
+    .play-btn-main { min-width: 40px !important; min-height: 40px !important; }
+    #shuffle-btn, #repeat-btn { display: none; }
 }
 
 /* ===== QUEUE PANEL ===== */
@@ -2410,7 +2410,7 @@ a:hover { text-decoration: underline; }
     width: 340px;
     max-width: calc(100vw - 16px);
     background: #0d0020;
-    z-index: 9998;
+    z-index: 1500;
     display: flex;
     flex-direction: column;
     transform: translateX(110%);
@@ -2569,10 +2569,6 @@ a:hover { text-decoration: underline; }
     width: 100%;
     padding: 1.5rem 1.5rem 2rem;
     flex: 1;
-}
-
-.now-playing-close {
-    display: none;
 }
 
 /* NP Collapse Button */
@@ -2779,71 +2775,6 @@ a:hover { text-decoration: underline; }
 
 .now-playing-overlay .now-playing-bg { display: none; }
 
-.now-playing-content {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    padding: 1.5rem 1.5rem 2rem;
-}
-
-.now-playing-close {
-    position: sticky;
-    top: 0;
-    align-self: flex-end;
-    background: rgba(255,255,255,0.08);
-    border: none;
-    color: var(--text);
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 5;
-    margin-bottom: 0.5rem;
-    transition: background 0.2s;
-    flex-shrink: 0;
-}
-
-.now-playing-close:hover { background: rgba(255,255,255,0.18); }
-
-.now-playing-info {
-    text-align: left;
-    margin-bottom: 0.75rem;
-    width: 100%;
-}
-
-.now-playing-info h2 {
-    font-size: 1.3rem;
-    font-weight: 700;
-    margin-bottom: 0.2rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    color: #fff;
-}
-
-.now-playing-info p {
-    color: rgba(255,255,255,0.5);
-    font-size: 0.85rem;
-}
-
-.now-playing-fav {
-    display: flex;
-    gap: 0.75rem;
-    align-items: center;
-    align-self: flex-start;
-    margin-bottom: 1rem;
-}
-
-.now-playing-controls {
-    width: 100%;
-}
-
 .np-fav-btn, .np-pl-btn {
     background: none;
     border: 2px solid rgba(255,255,255,0.2);
@@ -2868,8 +2799,6 @@ a:hover { text-decoration: underline; }
 }
 
 .np-fav-btn.favorited svg { fill: #00ff88; }
-
-.now-playing-controls { width: 100%; }
 
 .np-progress {
     display: flex;
@@ -2998,11 +2927,6 @@ a:hover { text-decoration: underline; }
 }
 
 .np-artist-more:hover {
-    background: rgba(255,45,149,0.1);
-    border-color: #ff2d95;
-}
-
-.np-artist-more:hover {
     background: rgba(255,255,255,0.1);
     border-color: rgba(255,255,255,0.5);
 }
@@ -3012,15 +2936,11 @@ a:hover { text-decoration: underline; }
     .mobile-bottom-nav {
         padding-bottom: env(safe-area-inset-bottom);
     }
+}
+@media (max-width: 768px) and (padding: env(safe-area-inset-bottom)) {
     .player-bar {
         padding-bottom: env(safe-area-inset-bottom);
     }
-}
-
-/* ===== TABLET LANDSCAPE & LARGE PHONES ===== */
-@media (min-width: 769px) and (max-width: 1024px) {
-    .song-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1rem; }
-    .artist-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 1rem; }
 }
 
 /* ===== MOBILE EMERGENCY OVERRIDE (last rule wins) ===== */
