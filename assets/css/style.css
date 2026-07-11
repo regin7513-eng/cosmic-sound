@@ -25,7 +25,7 @@
     --player-height: 80px;
 }
 
-html { font-size: 16px; -webkit-font-smoothing: antialiased; }
+html { font-size: 16px; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
 
 body {
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
@@ -406,6 +406,7 @@ a:hover { text-decoration: underline; }
 .main-content {
     background: #0a0014;
     overflow-y: auto;
+    overflow-x: hidden;
     padding: 0;
     display: flex;
     flex-direction: column;
@@ -1469,6 +1470,9 @@ a:hover { text-decoration: underline; }
 
 /* ===== RESPONSIVE ===== */
 
+/* Desktop: hide bottom nav (must be BEFORE media queries) */
+.mobile-bottom-nav { display: none; }
+
 /* Hide mobile menu button on desktop */
 .mobile-menu-btn {
     display: none !important;
@@ -1787,9 +1791,6 @@ a:hover { text-decoration: underline; }
     .player-info h4 { font-size: 0.65rem; }
     .player-info p { font-size: 0.55rem; }
 }
-
-/* Desktop: hide bottom nav */
-.mobile-bottom-nav { display: none; }
 
 /* ===== QUEUE PANEL ===== */
 .queue-panel {
