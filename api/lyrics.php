@@ -21,18 +21,33 @@ $url = "https://lrclib.net/api/search?" . http_build_query([
     'track_name' => $track
 ]);
 
-$ch = curl_init();
-curl_setopt_array($ch, [
-    CURLOPT_URL => $url,
-    CURLOPT_RETURNTRANSFER => true,
-    CURLOPT_TIMEOUT => 6,
-    CURLOPT_SSL_VERIFYPEER => false,
-    CURLOPT_HTTPHEADER => [
-        'User-Agent: GinzSong/1.0'
-    ]
-]);
-$response = curl_exec($ch);
-curl_close($ch);
+$response = null;
+for ($attempt = 0; $attempt < 3; $attempt++) {
+    $ch = curl_init();
+    curl_setopt_array($ch, [
+        CURLOPT_URL => $url,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_TIMEOUT => 10,
+        CURLOPT_SSL_VERIFYPEER => false,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_HTTPHEADER => [
+            'User-Agent: GinzSong/1.0',
+            'Accept: application/json'
+        ]
+    ]);
+    $response = curl_exec($ch);
+    $err = curl_error($ch);
+    $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($response && ($code === 200 || $code === 304)) break;
+    if ($attempt < 2) usleep(500000);
+}
+
+if (!$response || !$response) {
+    $ctx = stream_context_create(['http' => ['timeout' => 10, 'header' => "User-Agent: GinzSong/1.0\r\nAccept: application/json\r\n"]]);
+    $response = @file_get_contents($url, false, $ctx);
+}
 
 if (!$response) {
     $result = ['success' => false, 'message' => 'Failed to fetch lyrics'];

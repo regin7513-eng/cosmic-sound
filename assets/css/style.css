@@ -863,6 +863,9 @@ a:hover { text-decoration: underline; }
 
 .song-card.active .song-card-title { color: #ff2d95; }
 
+.song-card.unavailable { opacity: 0.5; cursor: not-allowed; }
+.song-card.unavailable .play-overlay { display: none; }
+
 /* Playlist Card */
 .playlist-card { position: relative; }
 .playlist-card .playlist-cover-gradient {

@@ -46,6 +46,11 @@ if ($method === 'POST') {
         $nextPos = intval($maxPos['data'][0]['position']) + 1;
     }
 
+    $trackUrl = $input['track_url'] ?? '';
+    if (empty($trackUrl)) {
+        $trackUrl = $trackId;
+    }
+
     $result = supabaseQuery('playlist_tracks', 'POST', [
         'playlist_id' => $playlistId,
         'track_id' => $trackId,
@@ -53,7 +58,7 @@ if ($method === 'POST') {
         'artist' => $input['artist'] ?? '',
         'album' => $input['album'] ?? '',
         'cover_image' => $input['cover_image'] ?? '',
-        'track_url' => $input['track_url'] ?? '',
+        'track_url' => $trackUrl,
         'file_path' => $input['file_path'] ?? '',
         'duration_text' => $input['duration_text'] ?? '',
         'position' => $nextPos
@@ -62,6 +67,8 @@ if ($method === 'POST') {
     if (isset($result['error'])) {
         echo json_encode(['success' => false, 'message' => $result['error']]);
     } else {
+        require_once __DIR__ . '/../config/cache.php';
+        cacheDelete('playlist_' . $user['user_id'] . '_' . $playlistId);
         echo json_encode(['success' => true, 'message' => 'Added to playlist']);
     }
     exit();
@@ -81,6 +88,8 @@ if ($method === 'DELETE') {
         'track_id' => 'eq.' . $trackId
     ], true);
 
+    require_once __DIR__ . '/../config/cache.php';
+    cacheDelete('playlist_' . $user['user_id'] . '_' . $playlistId);
     echo json_encode(['success' => true, 'message' => 'Removed from playlist']);
     exit();
 }

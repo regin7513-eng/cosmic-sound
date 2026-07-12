@@ -592,6 +592,7 @@ async function loadPlaylist(id) {
     if (playlistCache[id]) {
         var cached = playlistCache[id];
         allSongs = cached;
+        sectionSongs['home'] = allSongs;
         accumulateKnown(allSongs);
         document.getElementById('playlist-title').textContent = pl.name;
         renderGrid(grid, allSongs);
@@ -611,6 +612,7 @@ async function loadPlaylist(id) {
             if (data.success && data.data && data.data.length > 0) {
                 playlistCache[id] = data.data;
                 allSongs = data.data;
+                sectionSongs['home'] = allSongs;
                 accumulateKnown(allSongs);
                 document.getElementById('playlist-title').textContent = pl.name;
                 renderGrid(grid, allSongs);
@@ -634,7 +636,7 @@ async function loadPlaylist(id) {
     }
 }
 
-async function searchMusic(query) {
+async function searchMusic(query, instant) {
     if (!query.trim()) return;
 
     var homeBtn = document.querySelector('.nav-link[data-section="home"]');
@@ -642,6 +644,20 @@ async function searchMusic(query) {
 
     const grid = document.querySelector('#section-home .song-grid');
     if (!grid) return;
+
+    var cacheKey = query.trim().toLowerCase();
+    var cached = searchResultCache[cacheKey];
+
+    if (cached && instant) {
+        allSongs = cached;
+        sectionSongs['home'] = allSongs;
+        accumulateKnown(allSongs);
+        document.getElementById('playlist-title').textContent = 'Search: "' + esc(query) + '"';
+        renderGrid(grid, allSongs);
+        preloadUrls(allSongs);
+        return;
+    }
+
     grid.innerHTML = '<div class="empty-state"><div class="loading-spinner"></div><h3 style="margin-top:1rem">Searching...</h3></div>';
 
     try {
@@ -653,7 +669,9 @@ async function searchMusic(query) {
             return;
         }
 
+        searchResultCache[cacheKey] = data.data;
         allSongs = data.data;
+        sectionSongs['home'] = allSongs;
         accumulateKnown(allSongs);
         document.getElementById('playlist-title').textContent = 'Search: "' + esc(query) + '"';
         renderGrid(grid, allSongs);
@@ -687,6 +705,7 @@ async function loadRecent() {
     accumulateKnown(recentSongs);
     if (recentSongs.length > 0) {
         allSongs = recentSongs;
+        sectionSongs['recent-grid'] = recentSongs;
         renderGrid(grid, recentSongs);
     } else {
         grid.innerHTML = emptyState('No recently played songs', 'Songs you play will appear here');
@@ -833,23 +852,30 @@ function renderGrid(grid, songList) {
         return;
     }
     var gridId = grid.id || 'home';
+    var isInPlaylist = grid.id === 'user-playlists-grid' && currentPlaylistId;
     grid.innerHTML = songList.map(function(song, i) {
         var isActive = currentSong && currentSong.id === song.id;
         var isFav = isFavorited(song.id);
+        var noSource = !song.track_url;
         var playIcon = (isActive && isPlaying)
             ? '<svg width="20" height="20" viewBox="0 0 24 24" fill="#000"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>'
             : '<svg width="20" height="20" viewBox="0 0 24 24" fill="#000"><path d="M8 5v14l11-7z"/></svg>';
-        var cardClick = isActive ? 'togglePlay()' : 'playSongFromGrid(this, ' + i + ')';
-        return '<div class="song-card' + (isActive ? ' active' : '') + '" data-index="' + i + '" data-grid="' + gridId + '" onclick="' + cardClick + '" oncontextmenu="showContextMenuFromGrid(event, this, ' + i + ')">' +
+        var cardClick = noSource ? '' : (isActive ? 'togglePlay()' : 'playSongFromGrid(this)');
+        var songIdAttr = escAttr(song.id);
+        var unavailableBadge = noSource ? '<div class="unavailable-badge" title="Track unavailable" style="position:absolute;top:8px;right:8px;z-index:3;background:rgba(0,0,0,0.7);color:#ff4444;font-size:0.6rem;padding:2px 6px;border-radius:4px;">Unavailable</div>' : '';
+        var removeBtn = isInPlaylist ? '<button class="song-action-btn remove-btn" onclick="event.stopPropagation(); removeFromPlaylist(\'' + escAttr(song._track_id || song.id) + '\')" title="Remove from playlist"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>' : '';
+        return '<div class="song-card' + (isActive ? ' active' : '') + (noSource ? ' unavailable' : '') + '" data-index="' + i + '" data-song-id="' + songIdAttr + '" data-grid="' + gridId + '" onclick="' + cardClick + '" oncontextmenu="showContextMenuFromGrid(event, this)">' +
             '<div class="song-card-cover">' +
                 '<img src="' + esc(song.cover_image) + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">' +
+                unavailableBadge +
                 (isActive && isPlaying ? '<div class="now-playing-bars" style="position:absolute;bottom:8px;left:8px;z-index:3;"><span></span><span></span><span></span></div>' : '') +
-                '<div class="play-overlay"><div class="play-btn-circle">' + playIcon + '</div></div>' +
+                (noSource ? '' : '<div class="play-overlay"><div class="play-btn-circle">' + playIcon + '</div></div>') +
                 '<div class="song-card-actions">' +
-                    '<button class="song-action-btn fav-btn' + (isFav ? ' favorited' : '') + '" onclick="event.stopPropagation(); toggleFavoriteFromCard(this.closest(\'.song-card\'), ' + i + ')" title="Favorite">' +
+                    removeBtn +
+                    '<button class="song-action-btn fav-btn' + (isFav ? ' favorited' : '') + '" onclick="event.stopPropagation(); toggleFavoriteFromCard(this.closest(\'.song-card\'))" title="Favorite">' +
                         (isFav ? svgHeartFilled() : svgHeart()) +
                     '</button>' +
-                    '<button class="song-action-btn" onclick="event.stopPropagation(); showContextMenuFromGrid(event, this.closest(\'.song-card\'), ' + i + ')" title="More">' +
+                    '<button class="song-action-btn" onclick="event.stopPropagation(); showContextMenuFromGrid(event, this.closest(\'.song-card\'))" title="More">' +
                         '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>' +
                     '</button>' +
                 '</div>' +
@@ -874,8 +900,9 @@ function renderTrackList(grid, songList) {
     songList.forEach(function(song, i) {
         var isActive = currentSong && currentSong.id === song.id;
         var isFav = isFavorited(song.id);
-        var clickAction = isActive ? 'togglePlay()' : 'playSongFromGrid(this, ' + i + ')';
-        html += '<div class="track-item' + (isActive ? ' active' : '') + '" data-index="' + i + '" data-grid="' + gridId + '" onclick="' + clickAction + '" oncontextmenu="showContextMenuFromGrid(event, this, ' + i + ')">';
+        var songIdAttr = escAttr(song.id);
+        var clickAction = isActive ? 'togglePlay()' : 'playSongFromGrid(this)';
+        html += '<div class="track-item' + (isActive ? ' active' : '') + '" data-index="' + i + '" data-song-id="' + songIdAttr + '" data-grid="' + gridId + '" onclick="' + clickAction + '" oncontextmenu="showContextMenuFromGrid(event, this)">';
         html += '<div class="track-num">';
         if (isActive && isPlaying) {
             html += '<div class="now-playing-bars"><span></span><span></span><span></span></div>';
@@ -901,29 +928,39 @@ function renderTrackList(grid, songList) {
 
 function getSongFromCard(cardEl) {
     var gridEl = cardEl.closest('.song-grid');
-    var idx = parseInt(cardEl.dataset.index);
-    if (gridEl && gridEl._songs && gridEl._songs[idx]) return gridEl._songs[idx];
-    return allSongs[idx] || null;
+    if (gridEl && gridEl._songs) {
+        var idx = parseInt(cardEl.dataset.index, 10);
+        if (!isNaN(idx) && idx >= 0 && idx < gridEl._songs.length) return gridEl._songs[idx];
+    }
+    var songId = cardEl.dataset.songId;
+    if (songId) {
+        for (var i = 0; i < allSongs.length; i++) {
+            if (String(allSongs[i].id) === String(songId)) return allSongs[i];
+        }
+    }
+    return null;
 }
 
-function playSongFromGrid(cardEl, index) {
+function playSongFromGrid(cardEl) {
     var gridEl = cardEl.closest('.song-grid');
-    var songs = (gridEl && gridEl._songs) || allSongs;
-    if (index < 0 || index >= songs.length) return;
+    var songs = gridEl && gridEl._songs;
+    if (!songs || songs.length === 0) return;
+    var idx = parseInt(cardEl.dataset.index, 10);
+    if (isNaN(idx) || idx < 0 || idx >= songs.length) return;
     currentSection = gridEl?.id || 'home';
     sectionSongs[currentSection] = songs;
     allSongs = songs;
-    currentIndex = index;
-    currentSong = songs[index];
+    currentIndex = idx;
+    currentSong = songs[idx];
     playSongDirect();
 }
 
-function showContextMenuFromGrid(e, cardEl, index) {
+function showContextMenuFromGrid(e, cardEl) {
     var song = getSongFromCard(cardEl);
     if (song) showContextMenu(e, song);
 }
 
-function toggleFavoriteFromCard(cardEl, index) {
+function toggleFavoriteFromCard(cardEl) {
     var song = getSongFromCard(cardEl);
     if (song) toggleFavorite(song);
 }
@@ -932,9 +969,18 @@ var _pendingPlay = 0;
 var _silentAudio = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=';
 
 function playSongDirect() {
-    if (!currentSong || !currentSong.track_url) {
+    if (!currentSong || (!currentSong.track_url && !currentSong.id)) {
+        _pendingPlay = 0;
         showToast('This track is not available');
+        updatePlayButton();
+        var songs = sectionSongs[currentSection] || allSongs;
+        if (songs.length > 1) {
+            setTimeout(function() { playNext(); }, 500);
+        }
         return;
+    }
+    if (!currentSong.track_url && currentSong.id) {
+        currentSong.track_url = currentSong.id;
     }
 
     audio.pause();
@@ -1023,24 +1069,35 @@ function togglePlay() {
 }
 
 function playPrevious() {
-    if (allSongs.length === 0) return;
+    var songs = sectionSongs[currentSection] || allSongs;
+    if (songs.length === 0) return;
     if (audio.currentTime > 3) { audio.currentTime = 0; return; }
-    currentIndex = (currentIndex - 1 + allSongs.length) % allSongs.length;
-    currentSong = allSongs[currentIndex];
+    var attempts = 0;
+    do {
+        currentIndex = (currentIndex - 1 + songs.length) % songs.length;
+        attempts++;
+    } while (!songs[currentIndex].track_url && attempts < songs.length);
+    currentSong = songs[currentIndex];
     playSongDirect();
 }
 
 function playNext() {
-    if (allSongs.length === 0) return;
+    var songs = sectionSongs[currentSection] || allSongs;
+    if (songs.length === 0) return;
     if (isShuffled) {
         var n;
-        do { n = Math.floor(Math.random() * allSongs.length); } while (n === currentIndex && allSongs.length > 1);
+        var attempts = 0;
+        do { n = Math.floor(Math.random() * songs.length); attempts++; } while ((n === currentIndex || !songs[n].track_url) && attempts < songs.length * 2);
         currentIndex = n;
-        currentSong = allSongs[n];
+        currentSong = songs[n];
         playSongDirect();
     } else {
-        currentIndex = (currentIndex + 1) % allSongs.length;
-        currentSong = allSongs[currentIndex];
+        var attempts = 0;
+        do {
+            currentIndex = (currentIndex + 1) % songs.length;
+            attempts++;
+        } while (!songs[currentIndex].track_url && attempts < songs.length);
+        currentSong = songs[currentIndex];
         playSongDirect();
     }
 }
@@ -1276,13 +1333,14 @@ function refreshGrid() {
 var refreshGridTimer;
 function refreshGridNow() {
     document.querySelectorAll('.song-grid').forEach(function(grid) {
-        if (grid.id === 'user-playlists-grid' && !grid._songs) return;
-        if (grid._songs && grid._songs.length > 0) {
-            if (grid._renderType === 'tracklist') {
-                renderTrackList(grid, grid._songs);
-            } else {
-                renderGrid(grid, grid._songs);
-            }
+        if (!grid._songs || grid._songs.length === 0) return;
+        if (grid.id === 'user-playlists-grid' && grid._renderType !== 'grid' && grid._renderType !== 'tracklist') return;
+        var containsCurrentSong = currentSong && grid._songs.some(function(s) { return s.id === currentSong.id; });
+        if (!containsCurrentSong) return;
+        if (grid._renderType === 'tracklist') {
+            renderTrackList(grid, grid._songs);
+        } else {
+            renderGrid(grid, grid._songs);
         }
     });
     updateSearchNowPlaying();
@@ -1330,6 +1388,11 @@ function esc(str) {
     return d.innerHTML;
 }
 
+function escAttr(str) {
+    if (str == null) return '';
+    return String(str).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
 function svgHeart() {
     return '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>';
 }
@@ -1339,6 +1402,7 @@ function svgHeartFilled() {
 }
 
 var searchTimeout;
+var searchResultCache = {};
 function onSearchInput(q) {
     clearTimeout(searchTimeout);
     if (!q.trim()) {
@@ -1352,7 +1416,12 @@ function onSearchInput(q) {
         }
         return;
     }
-    searchTimeout = setTimeout(function() { searchMusic(q); }, 600);
+    var cached = searchResultCache[q.trim().toLowerCase()];
+    if (cached) {
+        searchMusic(q, true);
+        return;
+    }
+    searchTimeout = setTimeout(function() { searchMusic(q); }, 300);
 }
 
 function getRecentSearches() {
@@ -1459,7 +1528,7 @@ function onMobileSearchInput(q) {
         if (listEl) listEl.innerHTML = '';
     }
 
-    mobileSearchTimeout = setTimeout(function() { searchMusicMobile(q); }, 500);
+    mobileSearchTimeout = setTimeout(function() { searchMusicMobile(q); }, 250);
 }
 
 function submitMobileSearch(query) {
@@ -1518,6 +1587,7 @@ async function searchMusicMobile(query) {
         }
         addRecentSearch(query);
         allSongs = data.data;
+        sectionSongs['home'] = allSongs;
         accumulateKnown(allSongs);
         listEl.innerHTML = allSongs.map(function(song, i) { return searchResultHTML(song, i); }).join('');
         preloadUrls(allSongs);

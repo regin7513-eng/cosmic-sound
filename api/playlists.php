@@ -40,7 +40,14 @@ if ($method === 'GET') {
             'order' => 'position.asc'
         ], true);
 
-        $response = ['success' => true, 'data' => $playlist, 'tracks' => $tracks['data'] ?? []];
+        $trackData = array_map(function($t) {
+            if (empty($t['track_url']) && !empty($t['track_id'])) {
+                $t['track_url'] = $t['track_id'];
+            }
+            return $t;
+        }, $tracks['data'] ?? []);
+
+        $response = ['success' => true, 'data' => $playlist, 'tracks' => $trackData];
         cacheSet($cacheKey, $response);
         echo json_encode($response);
     } else {

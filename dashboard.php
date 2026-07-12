@@ -262,6 +262,7 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'User');
                         New Playlist
                     </button>
                 </div>
+                <div id="user-playlists-header"></div>
                 <div class="song-grid" id="user-playlists-grid"></div>
             </div>
         </main>
@@ -553,6 +554,7 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'User');
             if (favoritesCache) {
                 if (favoritesCache.length > 0) {
                     allSongs = favoritesCache;
+                    sectionSongs['favorites-grid'] = favoritesCache;
                     if (typeof accumulateKnown === 'function') accumulateKnown(favoritesCache);
                     renderGrid(grid, favoritesCache);
                 } else {
@@ -566,13 +568,15 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'User');
                 .then(function(data) {
                     if (data.success && data.data.length > 0) {
                         favoritesCache = data.data.map(function(f) {
-                            return { id: f.track_id, title: f.title, artist: f.artist, album: f.album, cover_image: f.cover_image, file_path: f.file_path, track_url: f.track_url, duration_text: f.duration_text, source: 'spotify' };
+                            return { id: f.track_id, title: f.title, artist: f.artist, album: f.album, cover_image: f.cover_image, file_path: f.file_path, track_url: f.track_url || f.track_id, duration_text: f.duration_text, source: 'spotify' };
                         });
                         allSongs = favoritesCache;
+                        sectionSongs['favorites-grid'] = favoritesCache;
                         if (typeof accumulateKnown === 'function') accumulateKnown(favoritesCache);
                         renderGrid(grid, favoritesCache);
                     } else {
                         favoritesCache = [];
+                        sectionSongs['favorites-grid'] = [];
                         grid.innerHTML = '<div class="empty-state"><div class="empty-state-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div><h3>No favorites yet</h3><p>Songs you love will appear here</p></div>';
                     }
                 })
@@ -583,8 +587,11 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'User');
 
         function loadUserPlaylists() {
             currentPlaylistId = null;
+            currentPlaylistName = '';
             document.getElementById('playlists-section-title').textContent = 'My Playlists';
             const grid = document.getElementById('user-playlists-grid');
+            const header = document.getElementById('user-playlists-header');
+            if (header) { header.innerHTML = ''; header.style.display = 'none'; }
             grid._songs = null;
 
             function renderPlaylistCards(data) {
@@ -638,10 +645,18 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'User');
                 });
         }
 
+        var currentPlaylistName = '';
+
         async function loadUserPlaylistTracks(playlistId, playlistName) {
             currentPlaylistId = playlistId;
+            currentPlaylistName = playlistName;
             document.getElementById('playlists-section-title').textContent = playlistName;
             const grid = document.getElementById('user-playlists-grid');
+            const header = document.getElementById('user-playlists-header');
+            if (header) {
+                header.innerHTML = '<div style="margin-bottom:1rem;"><button class="tab-btn" onclick="currentPlaylistId=null; loadUserPlaylists()" style="font-size:0.8rem;">&larr; Back to Playlists</button> <span style="color:var(--text-secondary);font-size:0.85rem;margin-left:0.5rem;">' + esc(playlistName) + '</span></div>';
+                header.style.display = '';
+            }
             grid.innerHTML = '<div class="empty-state"><div class="loading-spinner"></div><h3 style="margin-top:1rem">Loading ' + esc(playlistName) + '...</h3></div>';
             try {
                 const res = await fetch(API_BASE + '/playlists.php?id=' + playlistId, { credentials: 'same-origin' });
@@ -649,18 +664,24 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'User');
                 if (data.success && data.tracks && data.tracks.length > 0) {
                     const plSongs = data.tracks.map(t => ({
                         id: t.track_id, title: t.title, artist: t.artist, album: t.album,
-                        cover_image: t.cover_image, file_path: t.file_path, track_url: t.track_url,
+                        cover_image: t.cover_image, file_path: t.file_path,
+                        track_url: t.track_url || t.track_id,
                         duration_text: t.duration_text, source: 'spotify', _track_id: t.id
                     }));
                     allSongs = plSongs;
-                    grid.innerHTML = '<div style="margin-bottom:1rem;"><button class="tab-btn" onclick="currentPlaylistId=null; loadUserPlaylists()" style="font-size:0.8rem;">&larr; Back to Playlists</button> <span style="color:var(--text-secondary);font-size:0.85rem;margin-left:0.5rem;">' + esc(playlistName) + ' &middot; ' + plSongs.length + ' songs</span></div>';
+                    sectionSongs['user-playlists-grid'] = plSongs;
                     renderGrid(grid, plSongs);
+                    if (header) {
+                        header.querySelector('span:last-child').textContent = playlistName + ' \u00b7 ' + plSongs.length + ' songs';
+                    }
                 } else {
                     currentPlaylistId = null;
-                    grid.innerHTML = '<div style="margin-bottom:1rem;"><button class="tab-btn" onclick="currentPlaylistId=null; loadUserPlaylists()" style="font-size:0.8rem;">&larr; Back to Playlists</button></div><div class="empty-state"><div class="empty-state-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div><h3>No tracks yet</h3><p>Add songs from the Listen Now section</p></div>';
+                    if (header) { header.innerHTML = ''; header.style.display = 'none'; }
+                    grid.innerHTML = '<div class="empty-state"><div class="empty-state-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div><h3>No tracks yet</h3><p>Add songs from the Listen Now section</p></div>';
                 }
             } catch (e) {
                 currentPlaylistId = null;
+                if (header) { header.innerHTML = ''; header.style.display = 'none'; }
                 grid.innerHTML = '<div class="empty-state"><div class="empty-state-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div><h3>Could not load playlist</h3></div>';
             }
         }
@@ -676,8 +697,7 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'User');
                 if (data.success) {
                     playlistsCache = null;
                     showToast('Removed from playlist');
-                    var plName = document.querySelector('#user-playlists-grid .tab-btn + span')?.textContent?.split(' · ')[0] || 'Playlist';
-                    loadUserPlaylistTracks(currentPlaylistId, plName);
+                    loadUserPlaylistTracks(currentPlaylistId, currentPlaylistName);
                 } else {
                     showToast(data.message || 'Failed to remove');
                 }
