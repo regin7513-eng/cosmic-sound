@@ -1,7 +1,8 @@
 <?php
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
-header('Cache-Control: public, max-age=3600');
+
+require_once __DIR__ . '/../config/cache.php';
 
 $artist = $_GET['artist'] ?? '';
 $track = $_GET['track'] ?? '';
@@ -10,6 +11,10 @@ if (empty($artist) || empty($track)) {
     echo json_encode(['success' => false, 'message' => 'artist and track required']);
     exit();
 }
+
+$cacheKey = 'lyrics_' . md5($artist . '|' . $track);
+$cached = cacheGet($cacheKey, 3600);
+if ($cached !== null) { echo json_encode($cached); exit(); }
 
 $url = "https://lrclib.net/api/search?" . http_build_query([
     'artist_name' => $artist,
@@ -39,6 +44,7 @@ $data = json_decode($response, true);
 
 if (!is_array($data) || count($data) === 0) {
     $result = ['success' => false, 'message' => 'Lyrics not found'];
+    cacheSet($cacheKey, $result);
     echo json_encode($result);
     exit();
 }
@@ -79,5 +85,6 @@ $result = [
     'duration' => $best['duration'] ?? 0
 ];
 
+cacheSet($cacheKey, $result);
 echo json_encode($result);
 ?>

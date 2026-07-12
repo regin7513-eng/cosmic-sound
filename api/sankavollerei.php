@@ -2,6 +2,8 @@
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 
+require_once __DIR__ . '/../config/cache.php';
+
 $action = $_GET['action'] ?? '';
 $query  = $_GET['q'] ?? '';
 $url    = $_GET['url'] ?? '';
@@ -11,12 +13,17 @@ $API_KEY = 'planaai';
 $BASE = 'https://www.sankavollerei.web.id';
 
 if ($action === 'search' && $query) {
+    $cacheKey = 'search_' . $query . '_' . $limit;
+    $cached = cacheGet($cacheKey, 1800);
+    if ($cached !== null) { echo json_encode($cached); exit(); }
+
     $apiUrl = "$BASE/search/spotify?apikey=$API_KEY&q=" . urlencode($query);
     $data = fetchJson($apiUrl);
 
     if (!$data || empty($data['result'])) {
-        echo json_encode(['success' => false, 'data' => []]);
-        exit;
+        $response = ['success' => false, 'data' => []];
+        echo json_encode($response);
+        exit();
     }
 
     $tracks = array_slice($data['result'], 0, $limit);
@@ -39,18 +46,25 @@ if ($action === 'search' && $query) {
         ];
     }
 
-    echo json_encode(['success' => true, 'data' => $result]);
+    $response = ['success' => true, 'data' => $result];
+    cacheSet($cacheKey, $response);
+    echo json_encode($response);
 
 } elseif ($action === 'download' && $url) {
+    $cacheKey = 'download_' . md5($url);
+    $cached = cacheGet($cacheKey, 3600);
+    if ($cached !== null) { echo json_encode($cached); exit(); }
+
     $apiUrl = "$BASE/download/spotify?apikey=$API_KEY&url=" . urlencode($url);
     $data = fetchJson($apiUrl, 1);
 
     if (!$data || empty($data['data']['download'])) {
-        echo json_encode(['success' => false, 'download_url' => '']);
-        exit;
+        $response = ['success' => false, 'download_url' => ''];
+        echo json_encode($response);
+        exit();
     }
 
-    echo json_encode([
+    $response = [
         'success'       => true,
         'download_url'  => $data['data']['download'],
         'title'         => $data['data']['title'] ?? '',
@@ -58,7 +72,9 @@ if ($action === 'search' && $query) {
         'duration'      => ($data['data']['durasi'] ?? 0) / 1000,
         'cover_image'   => $data['data']['image'] ?? '',
         'album'         => $data['data']['album'] ?? '',
-    ]);
+    ];
+    cacheSet($cacheKey, $response);
+    echo json_encode($response);
 
 } else {
     http_response_code(400);

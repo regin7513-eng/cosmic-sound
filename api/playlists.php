@@ -9,6 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(200); exit();
 
 require_once __DIR__ . '/../config/supabase.php';
 require_once __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/../config/cache.php';
 
 $user = requireAuth();
 $method = $_SERVER['REQUEST_METHOD'];
@@ -17,6 +18,10 @@ if ($method === 'GET') {
     $playlistId = $_GET['id'] ?? '';
 
     if ($playlistId) {
+        $cacheKey = 'playlist_' . $user['user_id'] . '_' . $playlistId;
+        $cached = cacheGet($cacheKey, 120);
+        if ($cached !== null) { echo json_encode($cached); exit(); }
+
         $result = supabaseQuery('playlists', 'GET', null, [
             'id' => 'eq.' . $playlistId,
             'user_id' => 'eq.' . $user['user_id'],
@@ -35,11 +40,17 @@ if ($method === 'GET') {
             'order' => 'position.asc'
         ], true);
 
-        echo json_encode(['success' => true, 'data' => $playlist, 'tracks' => $tracks['data'] ?? []]);
+        $response = ['success' => true, 'data' => $playlist, 'tracks' => $tracks['data'] ?? []];
+        cacheSet($cacheKey, $response);
+        echo json_encode($response);
     } else {
+        $cacheKey = 'playlists_list_' . $user['user_id'];
+        $cached = cacheGet($cacheKey, 120);
+        if ($cached !== null) { echo json_encode($cached); exit(); }
+
         $result = supabaseQuery('playlists', 'GET', null, [
             'user_id' => 'eq.' . $user['user_id'],
-            'select' => '*',
+            'select' => 'id,name,description,created_at',
             'order' => 'created_at.desc'
         ], true);
 
@@ -56,21 +67,22 @@ if ($method === 'GET') {
         }
         unset($p);
 
-        echo json_encode(['success' => true, 'data' => $playlists]);
+        $response = ['success' => true, 'data' => $playlists];
+        cacheSet($cacheKey, $response);
+        echo json_encode($response);
     }
     exit();
 }
 
 if ($method === 'POST') {
     $input = json_decode(file_get_contents('php://input'), true);
-
     $result = supabaseQuery('playlists', 'POST', [
         'user_id' => $user['user_id'],
         'name' => $input['name'] ?? 'My Playlist',
         'description' => $input['description'] ?? '',
         'cover_image' => $input['cover_image'] ?? ''
     ], [], true);
-
+    cacheDelete('playlists_list_' . $user['user_id']);
     if (isset($result['error'])) {
         echo json_encode(['success' => false, 'message' => $result['error']]);
     } else {
@@ -85,12 +97,12 @@ if ($method === 'DELETE') {
         echo json_encode(['success' => false, 'message' => 'id required']);
         exit();
     }
-
     supabaseQuery('playlists', 'DELETE', null, [
         'id' => 'eq.' . $playlistId,
         'user_id' => 'eq.' . $user['user_id']
     ], true);
-
+    cacheDelete('playlists_list_' . $user['user_id']);
+    cacheDelete('playlist_' . $user['user_id'] . '_' . $playlistId);
     echo json_encode(['success' => true, 'message' => 'Playlist deleted']);
     exit();
 }

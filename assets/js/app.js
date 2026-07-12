@@ -59,6 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (document.querySelector('.song-grid')) loadPlaylist('trending');
 
     setTimeout(prefetchPlaylists, 2000);
+    setTimeout(preloadUserData, 3000);
 
     document.addEventListener('click', (e) => {
         const menu = document.getElementById('context-menu');
@@ -511,6 +512,30 @@ async function createPlaylist(e) {
 }
 
 var playlistCache = {};
+
+function preloadUserData() {
+    fetch(API_BASE + '/favorites.php', { credentials: 'same-origin' })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.success && data.data.length > 0) {
+                favoritesCache = data.data.map(function(f) {
+                    return { id: f.track_id, title: f.title, artist: f.artist, album: f.album, cover_image: f.cover_image, file_path: f.file_path, track_url: f.track_url, duration_text: f.duration_text, source: 'spotify' };
+                });
+            } else {
+                favoritesCache = [];
+            }
+        }).catch(function() {});
+
+    fetch(API_BASE + '/playlists.php', { credentials: 'same-origin' })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.success && data.data.length > 0) {
+                playlistsCache = data.data;
+            } else {
+                playlistsCache = [];
+            }
+        }).catch(function() {});
+}
 
 function prefetchPlaylists() {
     var items = [
