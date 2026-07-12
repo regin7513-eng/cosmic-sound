@@ -863,7 +863,7 @@ function renderGrid(grid, songList) {
         var cardClick = noSource ? '' : (isActive ? 'togglePlay()' : 'playSongFromGrid(this)');
         var songIdAttr = escAttr(song.id);
         var unavailableBadge = noSource ? '<div class="unavailable-badge" title="Track unavailable" style="position:absolute;top:8px;right:8px;z-index:3;background:rgba(0,0,0,0.7);color:#ff4444;font-size:0.6rem;padding:2px 6px;border-radius:4px;">Unavailable</div>' : '';
-        var removeBtn = isInPlaylist ? '<button class="song-action-btn remove-btn" onclick="event.stopPropagation(); removeFromPlaylist(\'' + escAttr(song._track_id || song.id) + '\')" title="Remove from playlist"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>' : '';
+        var removeBtn = isInPlaylist ? '<button class="song-action-btn remove-btn" onclick="event.stopPropagation(); removeFromPlaylist(\'' + escAttr(song.id) + '\')" title="Remove from playlist"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>' : '';
         return '<div class="song-card' + (isActive ? ' active' : '') + (noSource ? ' unavailable' : '') + '" data-index="' + i + '" data-song-id="' + songIdAttr + '" data-grid="' + gridId + '" onclick="' + cardClick + '" oncontextmenu="showContextMenuFromGrid(event, this)">' +
             '<div class="song-card-cover">' +
                 '<img src="' + esc(song.cover_image) + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">' +

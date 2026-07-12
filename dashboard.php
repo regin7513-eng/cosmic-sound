@@ -645,8 +645,6 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'User');
                 });
         }
 
-        var currentPlaylistName = '';
-
         async function loadUserPlaylistTracks(playlistId, playlistName) {
             currentPlaylistId = playlistId;
             currentPlaylistName = playlistName;
