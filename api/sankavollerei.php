@@ -43,7 +43,7 @@ if ($action === 'search' && $query) {
 
 } elseif ($action === 'download' && $url) {
     $apiUrl = "$BASE/download/spotify?apikey=$API_KEY&url=" . urlencode($url);
-    $data = fetchJson($apiUrl);
+    $data = fetchJson($apiUrl, 1);
 
     if (!$data || empty($data['data']['download'])) {
         echo json_encode(['success' => false, 'download_url' => '']);

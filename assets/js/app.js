@@ -250,7 +250,7 @@ function initPlayer() {
     document.getElementById('volume-slider').style.setProperty('--vol-pct', '70%');
     audio.addEventListener('timeupdate', () => { updateProgress(); updateLyricsHighlight(); updateNpLyricsHighlight(); updateMediaSessionPosition(); });
     audio.addEventListener('loadedmetadata', updateDuration);
-    audio.addEventListener('play', () => { isPlaying = true; updatePlayButton(); refreshGrid(); updateMediaSessionState(); });
+    audio.addEventListener('play', () => { _pendingPlay = 0; isPlaying = true; updatePlayButton(); refreshGrid(); updateMediaSessionState(); });
     audio.addEventListener('pause', () => { isPlaying = false; updatePlayButton(); refreshGrid(); updateMediaSessionState(); });
     audio.addEventListener('ended', handleSongEnd);
     audio.addEventListener('error', () => showToast('Unable to play this track'));
@@ -903,6 +903,9 @@ function toggleFavoriteFromCard(cardEl, index) {
     if (song) toggleFavorite(song);
 }
 
+var _pendingPlay = 0;
+var _silentAudio = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=';
+
 function playSongDirect() {
     if (!currentSong || !currentSong.track_url) {
         showToast('This track is not available');
@@ -910,13 +913,16 @@ function playSongDirect() {
     }
 
     audio.pause();
+    audio.removeAttribute('src');
+    audio.load();
 
     currentSongId++;
+    _pendingPlay = currentSongId;
     var myId = currentSongId;
 
     updatePlayerUI();
-    updatePlayButton();
-    if (!isMobile()) refreshGrid();
+    var playBtn = document.getElementById('play-btn');
+    if (playBtn) playBtn.innerHTML = '<div class="loading-spinner" style="width:18px;height:18px;border-width:2px;"></div>';
 
     if (lyricsVisible && currentSong) {
         loadLyrics(currentSong);
@@ -926,18 +932,24 @@ function playSongDirect() {
     if (cachedUrl) {
         playWithUrl(cachedUrl, myId);
     } else {
-        var silentUnlock = audio.play();
-        if (silentUnlock) { silentUnlock.then(function() { audio.pause(); }).catch(function() {}); }
+        audio.src = _silentAudio;
+        audio.play().then(function() { audio.pause(); }).catch(function() {});
         fetchDownloadUrl(currentSong.track_url).then(function(downloadUrl) {
             if (myId !== currentSongId) return;
             if (downloadUrl) {
                 urlCache[currentSong.track_url] = downloadUrl;
                 playWithUrl(downloadUrl, myId);
             } else {
+                _pendingPlay = 0;
                 showToast('Unable to load track');
+                updatePlayButton();
             }
         }).catch(function() {
-            if (myId === currentSongId) showToast('Playback error');
+            if (myId === currentSongId) {
+                _pendingPlay = 0;
+                showToast('Playback error');
+                updatePlayButton();
+            }
         });
     }
 }
@@ -1214,6 +1226,10 @@ function preloadLyrics(song) {
 function updatePlayButton() {
     var btn = document.getElementById('play-btn');
     if (!btn) return;
+    if (_pendingPlay && _pendingPlay === currentSongId) {
+        btn.innerHTML = '<div class="loading-spinner" style="width:18px;height:18px;border-width:2px;"></div>';
+        return;
+    }
     btn.innerHTML = isPlaying
         ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="#000"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>'
         : '<svg width="18" height="18" viewBox="0 0 24 24" fill="#000"><path d="M8 5v14l11-7z"/></svg>';
