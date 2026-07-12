@@ -96,20 +96,18 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    var _firstVisible = true;
     document.addEventListener('visibilitychange', function() {
         if (document.visibilityState === 'visible') {
+            if (_firstVisible) { _firstVisible = false; return; }
             fetch(API_BASE + '/session_refresh.php', { method: 'POST', credentials: 'same-origin' })
                 .then(function(r) { return r.json(); })
                 .then(function(data) {
                     if (!data.success && data.expired) {
-                        var hasContent = document.querySelector('.song-grid .song-card');
-                        if (!hasContent) {
-                            if (currentSong && isPlaying) audio.pause();
-                            window.location.href = '/cosmic-sound/login.php';
-                        }
+                        if (currentSong && isPlaying) audio.pause();
+                        window.location.href = '/cosmic-sound/login.php';
                     } else if (data.success) {
                         loadFavoriteIds();
-                        refreshGrid();
                     }
                 })
                 .catch(function() {});
@@ -511,26 +509,27 @@ async function createPlaylist(e) {
 var playlistCache = {};
 
 function prefetchPlaylists() {
-    var ids = ['chill', 'energy', 'romance', 'focus', 'party', 'sad', 'indie', 'hiphop', 'karaoke'];
-    var queries = {
-        'chill': 'lofi chill beats relaxing',
-        'energy': 'workout motivation pump up',
-        'romance': 'love songs romantic',
-        'focus': 'study music instrumental concentration',
-        'party': 'party dance hits club',
-        'sad': 'sad emotional heartbreak',
-        'indie': 'indie alternative chill',
-        'hiphop': 'hip hop rap best',
-        'karaoke': 'karaoke sing along popular'
-    };
+    var items = [
+        ['trending', 'top hits 2025'],
+        ['chill', 'lofi chill beats relaxing'],
+        ['energy', 'workout motivation pump up'],
+        ['romance', 'love songs romantic'],
+        ['focus', 'study music instrumental concentration'],
+        ['party', 'party dance hits club'],
+        ['sad', 'sad emotional heartbreak'],
+        ['indie', 'indie alternative chill'],
+        ['hiphop', 'hip hop rap best'],
+        ['karaoke', 'karaoke sing along popular']
+    ];
     var i = 0;
     function next() {
-        if (i >= ids.length) return;
-        var batch = ids.slice(i, i + 3);
+        if (i >= items.length) return;
+        var batch = items.slice(i, i + 3);
         i += 3;
-        batch.forEach(function(id) {
+        batch.forEach(function(pair) {
+            var id = pair[0], q = pair[1];
             if (playlistCache[id]) return;
-            var url = API_BASE + '/sankavollerei.php?action=search&q=' + encodeURIComponent(queries[id]) + '&limit=18&_t=' + Date.now();
+            var url = API_BASE + '/sankavollerei.php?action=search&q=' + encodeURIComponent(q) + '&limit=18&_t=' + Date.now();
             fetch(url).then(function(r) { return r.json(); }).then(function(data) {
                 if (data.success && data.data && data.data.length > 0) {
                     playlistCache[id] = data.data;
@@ -594,7 +593,16 @@ async function loadPlaylist(id) {
             if (attempt < 2) { await new Promise(r => setTimeout(r, 500)); continue; }
         }
     }
-    grid.innerHTML = emptyState('Couldn\'t load playlist', 'Check your connection and try again');
+    if (allSongs && allSongs.length > 0) {
+        document.getElementById('playlist-title').textContent = pl.name;
+        renderGrid(grid, allSongs);
+    } else {
+        grid.innerHTML = emptyState('Couldn\'t load playlist', '<span style="cursor:pointer;color:var(--primary);text-decoration:underline" id="retry-playlist-btn">Tap to retry</span>');
+        setTimeout(function() {
+            var btn = document.getElementById('retry-playlist-btn');
+            if (btn) btn.onclick = function() { loadPlaylist(id); };
+        }, 0);
+    }
 }
 
 async function searchMusic(query) {
