@@ -1,0 +1,253 @@
+# Script Presentasi UAS Pemweb - Ginz Song
+## Music Streaming Web Application
+
+---
+
+## BAGIAN 1: PEMBUKAAN (30 detik)
+
+> "Assalamualaikum warahmatullahi wabarakatuh. Perkenalkan, nama saya [NAMA], dari kelompok [NAMA KELOMPOK], kelas [KELAS].
+>
+> Pada kesempatan ini, saya akan mempresentasikan tugas UAS Pemrograman Web saya, yaitu sebuah aplikasi music streaming bernama **Ginz Song**.
+>
+> Aplikasi ini dibangun menggunakan arsitektur modern: **PHP** di sisi server, **Supabase** sebagai database dan autentikasi, serta **vanilla JavaScript** untuk seluruh interaksi frontend tanpa framework."
+
+---
+
+## BAGIAN 2: TECH STACK & ARSITEKTUR (45 detik)
+
+> "Berikut tech stack yang digunakan:
+>
+> **Backend:**
+> - PHP 8.2 sebagai bahasa server-side
+> - Supabase PostgreSQL untuk database, autentikasi, dan Row Level Security
+> - REST API yang saya buat sendiri untuk komunikasi client-server
+>
+> **Frontend:**
+> - HTML5, CSS3, dan Vanilla JavaScript
+> - Tidak menggunakan framework — semua dibangun dari nol
+> - Desain Cyberpunk Neon Pink konsisten di seluruh halaman
+>
+> **Music Source:**
+> - Menggunakan Sankavollerei Spotify API sebagai sumber lagu
+> - LRCLIB API untuk lirik syncronized
+>
+> **Deploy:**
+> - GitHub untuk version control
+> - Railway untuk production deployment
+> - URL: cosmic-sound-production.up.railway.app"
+
+---
+
+## BAGIAN 3: DEMO FITUR - REGISTER & LOGIN (1 menit)
+
+> "Mari kita mulai demo-nya.
+>
+> **[Buka browser, tampilkan halaman login]**
+>
+> Pertama, tampilan halaman login. Pengguna bisa masuk dengan email dan password yang sudah terdaftar di Supabase.
+>
+> **[Klik Register]**
+>
+> Di halaman register, pengguna bisa membuat akun baru. Sistem menggunakan Supabase Auth API untuk mendaftarkan user baru, lalu menyimpan profil tambahan seperti username ke tabel `user_profiles` di database.
+>
+> **[Login dengan akun yang sudah ada]**
+>
+> Setelah login, session disimpan di PHP session dengan expiry 7 hari, dan refresh token disimpan di cookie sebagai backup. Ini memastikan user tidak perlu login ulang meskipun menutup browser cukup lama."
+
+---
+
+## BAGIAN 4: DEMO FITUR - DASHBOARD & GENRE TABS (1 menit 30 detik)
+
+> "Ini adalah halaman utama atau dashboard.
+>
+> **[Tunjukkan bagian home]**
+>
+> Di bagian atas terdapat search bar, kemudian di bawahnya terdapat genre tabs: Trending, Chill, Energy, Romance, Focus, Party, Sad, Indie, Hip Hop, dan Karaoke.
+>
+> **[Klik satu per satu genre tab]**
+>
+> Setiap genre memiliki query pencarian yang berbeda. Misalnya Trending menampilkan 'top hits 2025', Chill menampilkan 'lofi chill beats relaxing'.
+>
+> Yang menarik, saat pertama kali dashboard dimuat, semua genre sudah di-prefetch di background secara paralel dalam 3 batch. Jadi ketika user mengklik genre lain, lagu langsung muncul tanpa loading — semua sudah tersimpan di browser cache.
+>
+> **[Tunjukkan kartu lagu]**
+>
+> Setiap kartu lagu menampilkan cover image dari Spotify CDN, judul lagu, nama artist, durasi, dan dua tombol aksi: heart untuk favorit dan titik tiga untuk context menu."
+
+---
+
+## BAGIAN 5: DEMO FITUR - PLAYER BAR (1 menit 30 detik)
+
+> "Di bagian bawah layar terdapat player bar.
+>
+> **[Klik salah satu lagu]**
+>
+> Saat lagu diputar, player bar menampilkan cover art, judul lagu, nama artist, dan kontrol playback: previous, play/pause, next, shuffle, repeat.
+>
+> **[Geser progress bar]**
+>
+> Progress bar bisa di-klik atau di-drag untuk seek ke bagian tertentu lagu.
+>
+> **[Geser volume slider]**
+>
+> Volume slider juga bisa diatur. Dan di mobile, terdapat thin progress bar berwarna pink di bagian atas player bar seperti Spotify.
+>
+> **[Tunjukkan Now Playing panel]**
+>
+> Di desktop, terdapat Now Playing panel di sebelah kanan yang bisa di-collapse ke strip tipis. Panel ini menampilkan info lagu yang lebih detail, tombol like, add to playlist, dan lirik yang tersyncronized."
+
+---
+
+## BAGIAN 6: DEMO FITUR - SYNCED LYRICS (1 menit)
+
+> "Salah satu fitur unggulan adalah synced lyrics.
+>
+> **[Putar lagu yang punya lirik]**
+>
+> **[Klik tombol lyrics di player bar]**
+>
+> Lirik diambil dari LRCLIB API secara real-time. Lirik otomatis scroll dan highlight mengikuti waktu lagu yang sedang diputar.
+>
+> **[Klik salah satu baris lirik]**
+>
+> User juga bisa mengklik baris lirik tertentu untuk langsung seek ke bagian lagu tersebut."
+
+---
+
+## BAGIAN 7: DEMO FITUR - FAVORITES & PLAYLISTS (1 menit 30 detik)
+
+> "Fitur Library terdiri dari Favorites dan My Playlists.
+>
+> **[Klik Favorites di sidebar]**
+>
+> Untuk menambahkan lagu ke favorit, klik icon heart di kartu lagu. Status favorit tersinkronisasi antara kartu lagu, player bar, dan Now Playing panel.
+>
+> **[Klik My Playlists]**
+>
+> User bisa membuat playlist baru dengan nama dan deskripsi.
+>
+> **[Buat playlist baru]**
+>
+> **[Putar lagu, klik context menu, pilih Add to Playlist]**
+>
+> Lagu bisa ditambahkan ke playlist dari context menu di kartu lagu atau dari Now Playing panel.
+>
+> **[Buka playlist, tunjukkan isi lagu]**
+>
+> Di dalam playlist, user bisa memutar lagu atau menghapus lagu dari playlist."
+
+---
+
+## BAGIAN 8: DEMO FITUR - SEARCH (1 menit)
+
+> "Fitur pencarian lagu.
+>
+> **[Ketik nama lagu atau artist di search bar]**
+>
+> Pencarian menggunakan Sankavollerei Spotify API. Hasil pencarian menampilkan lagu dengan cover, judul, artist, dan durasi.
+>
+> **[Klik salah satu hasil pencarian]**
+>
+> Di mobile, pencarian menampilkan list view Spotify-style dengan now-playing indicator berupa animated bars berwarna pink untuk lagu yang sedang diputar.
+>
+> Fitur search juga menyimpan recent searches — lagu yang baru diputar akan muncul di search page saat belum ada query."
+
+---
+
+## BAGIAN 9: DEMO FITUR - MOBILE RESPONSIVE (1 menit)
+
+> "Aplikasi ini fully responsive untuk mobile.
+>
+> **[Resize browser atau tampilkan di HP]**
+>
+> Di mobile, sidebar hilang dan diganti dengan bottom navigation bar dengan 4 tab: Home, Favorites, Search, dan Library.
+>
+> **[Tunjukkan fitur mobile]**
+>
+> Header mobile menampilkan avatar user dan dropdown menu. Genre tabs berubah menjadi horizontal scroll. Kartu lagu menggunakan list view alih-alih grid.
+>
+> Now Playing panel di mobile berubah menjadi full-screen overlay yang bisa diakses dengan swipe atau klik.
+
+---
+
+## BAGIAN 10: DEMO FITUR - DATABASE & FAVORITES SYNC (1 menit)
+
+> "Semua data tersimpan di Supabase.
+>
+> **[Tunjukkan Supabase dashboard]**
+>
+> Terdapat 4 tabel utama: `user_profiles`, `favorites`, `playlists`, dan `playlist_tracks`.
+>
+> Setiap tabel dilengkapi dengan Row Level Security policies — user hanya bisa mengakses data miliknya sendiri.
+>
+> **[Tunjukkan favorit sync antara HP dan laptop]**
+>
+> Ketika lagu di-favoritkan dari HP, lagu yang sama juga muncul sebagai favorit di laptop. Ini karena data tersimpan di cloud database Supabase, bukan di localStorage."
+
+---
+
+## BAGIAN 11: DEMO FITUR - ADVANCED FEATURES (1 menit)
+
+> "Beberapa fitur lanjutan lainnya:
+>
+> **[Tunjukkan keyboard shortcuts]**
+>
+> - Tekan **Space** untuk play/pause
+> - Tekan **Escape** untuk menutup Now Playing panel
+>
+> **[Tunjukkan MediaSession API]**
+>
+> Di Android, notifikasi media muncul saat lagu diputar di background. Kontrol play/pause, next, dan previous bisa diakses dari notifikasi.
+>
+> **[Tunjukkan PWA]**
+>
+> Aplikasi bisa di-install sebagai Progressive Web App. Service worker caching memastikan aplikasi tetap bisa diakses meskipun jaringan tidak stabil.
+>
+> **[Tunjukkan bfcache handling]**
+>
+> Saat user menutup laptop dan membuka kembali, halaman langsung tampil dengan data terbaru berkat session auto-refresh."
+
+---
+
+## BAGIAN 12: PENUTUPAN (30 detik)
+
+> "Demikian presentasi dari aplikasi Ginz Song.
+>
+> Beberapa tantangan yang saya hadapi selama pengembangan:
+> 1. Integrasi dengan external API yang kadang tidak stabil
+> 2. Implementasi synced lyrics dari LRCLIB API
+> 3. Mobile responsiveness untuk berbagai ukuran layar
+> 4. Session management yang robust untuk production deployment
+>
+> Terima kasih atas perhatiannya. Apakah ada pertanyaan?"
+>
+> "Wassalamualaikum warahmatullahi wabarakatuh."
+
+---
+
+## TIPS REKAM VIDEO
+
+1. **Persiapan:**
+   - Siapkan 2 browser tab: satu untuk app, satu untuk Supabase dashboard
+   - Siapkan HP untuk demo mobile
+   - Pastikan audio lagu bisa terdengar di recording
+
+2. **Durasi ideal:** 8-12 menit
+
+3. **Cara rekam:**
+   - OBS Studio (gratis) untuk screen recording
+   - Atau pakai extension browser seperti Loom
+   - Rekam layar + suara sekaligus
+
+4. **Saat presentasi:**
+   - Jangan buru-buru, klik satu per satu
+   - Jelaskan apa yang dilakukan SEBELUM mengklik
+   - Tunjukkan error handling (misal: coba search yang tidak ada hasilnya)
+   - Tunjukkan responsive design (resize browser)
+
+5. **Yang harus ditonjolkan:**
+   - Cyberpunk theme yang konsisten
+   - Prefetch genre tabs (klik berulang → instant)
+   - Synced lyrics
+   - Mobile bottom nav
+   - Database di Supabase (bukan MySQL)

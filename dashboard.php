@@ -545,49 +545,59 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'User');
             }
         }
 
-        async function loadFavorites() {
+        var favoritesCache = null;
+        var playlistsCache = null;
+
+        function loadFavorites() {
             const grid = document.getElementById('favorites-grid');
-            grid.innerHTML = '<div class="empty-state"><div class="loading-spinner"></div><h3 style="margin-top:1rem">Loading favorites...</h3></div>';
-            try {
-                const res = await fetch(API_BASE + '/favorites.php', { credentials: 'same-origin' });
-                const data = await res.json();
-                if (data.success && data.data.length > 0) {
-                    const favSongs = data.data.map(f => ({
-                        id: f.track_id, title: f.title, artist: f.artist, album: f.album,
-                        cover_image: f.cover_image, file_path: f.file_path, track_url: f.track_url,
-                        duration_text: f.duration_text, source: 'spotify'
-                    }));
-                    allSongs = favSongs;
-                    if (typeof accumulateKnown === 'function') accumulateKnown(favSongs);
-                    renderGrid(grid, favSongs);
+            if (favoritesCache) {
+                if (favoritesCache.length > 0) {
+                    allSongs = favoritesCache;
+                    if (typeof accumulateKnown === 'function') accumulateKnown(favoritesCache);
+                    renderGrid(grid, favoritesCache);
                 } else {
-                    allSongs = [];
                     grid.innerHTML = '<div class="empty-state"><div class="empty-state-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div><h3>No favorites yet</h3><p>Songs you love will appear here</p></div>';
                 }
-            } catch (e) {
-                grid.innerHTML = '<div class="empty-state"><div class="empty-state-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div><h3>Could not load favorites</h3></div>';
+            } else {
+                grid.innerHTML = '<div class="empty-state"><div class="loading-spinner"></div><h3 style="margin-top:1rem">Loading favorites...</h3></div>';
             }
+            fetch(API_BASE + '/favorites.php', { credentials: 'same-origin' })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (data.success && data.data.length > 0) {
+                        favoritesCache = data.data.map(function(f) {
+                            return { id: f.track_id, title: f.title, artist: f.artist, album: f.album, cover_image: f.cover_image, file_path: f.file_path, track_url: f.track_url, duration_text: f.duration_text, source: 'spotify' };
+                        });
+                        allSongs = favoritesCache;
+                        if (typeof accumulateKnown === 'function') accumulateKnown(favoritesCache);
+                        renderGrid(grid, favoritesCache);
+                    } else {
+                        favoritesCache = [];
+                        grid.innerHTML = '<div class="empty-state"><div class="empty-state-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div><h3>No favorites yet</h3><p>Songs you love will appear here</p></div>';
+                    }
+                })
+                .catch(function() {
+                    if (!favoritesCache) grid.innerHTML = '<div class="empty-state"><h3>Could not load favorites</h3></div>';
+                });
         }
 
-        async function loadUserPlaylists() {
+        function loadUserPlaylists() {
             currentPlaylistId = null;
             document.getElementById('playlists-section-title').textContent = 'My Playlists';
             const grid = document.getElementById('user-playlists-grid');
             grid._songs = null;
-            grid.innerHTML = '<div class="empty-state"><div class="loading-spinner"></div><h3 style="margin-top:1rem">Loading playlists...</h3></div>';
-            try {
-                const res = await fetch(API_BASE + '/playlists.php', { credentials: 'same-origin' });
-                const data = await res.json();
-                if (data.success && data.data.length > 0) {
-                    grid.innerHTML = data.data.map(p => {
-                        var covers = (p.track_covers || []).filter(c => c).slice(0, 4);
+
+            function renderPlaylistCards(data) {
+                if (data.length > 0) {
+                    grid.innerHTML = data.map(function(p) {
+                        var covers = (p.track_covers || []).filter(function(c) { return c; }).slice(0, 4);
                         var coverHtml;
                         if (covers.length === 0) {
                             coverHtml = '<div class="playlist-cover-gradient"><svg width="32" height="32" viewBox="0 0 24 24" fill="white"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg></div>';
                         } else if (covers.length === 1) {
                             coverHtml = '<img src="' + covers[0] + '" alt="" style="width:100%;height:100%;object-fit:cover;">';
                         } else {
-                            coverHtml = '<div class="playlist-collage">' + covers.map(c => '<img src="' + c + '" alt="">').join('') + '</div>';
+                            coverHtml = '<div class="playlist-collage">' + covers.map(function(c) { return '<img src="' + c + '" alt="">'; }).join('') + '</div>';
                         }
                         return '<div class="song-card playlist-card">' +
                             '<div class="song-card-cover" onclick="loadUserPlaylistTracks(\'' + p.id + '\', \'' + esc(p.name).replace(/'/g, "\\'") + '\')" style="cursor:pointer">' +
@@ -604,9 +614,28 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'User');
                 } else {
                     grid.innerHTML = '<div class="empty-state"><div class="empty-state-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div><h3>No playlists yet</h3><p>Create playlists to save your favorite tracks</p></div>';
                 }
-            } catch (e) {
-                grid.innerHTML = '<div class="empty-state"><div class="empty-state-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div><h3>Could not load playlists</h3></div>';
             }
+
+            if (playlistsCache) {
+                renderPlaylistCards(playlistsCache);
+            } else {
+                grid.innerHTML = '<div class="empty-state"><div class="loading-spinner"></div><h3 style="margin-top:1rem">Loading playlists...</h3></div>';
+            }
+
+            fetch(API_BASE + '/playlists.php', { credentials: 'same-origin' })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (data.success && data.data.length > 0) {
+                        playlistsCache = data.data;
+                        renderPlaylistCards(playlistsCache);
+                    } else {
+                        playlistsCache = [];
+                        renderPlaylistCards([]);
+                    }
+                })
+                .catch(function() {
+                    if (!playlistsCache) grid.innerHTML = '<div class="empty-state"><h3>Could not load playlists</h3></div>';
+                });
         }
 
         async function loadUserPlaylistTracks(playlistId, playlistName) {
@@ -645,6 +674,7 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'User');
                 });
                 const data = await res.json();
                 if (data.success) {
+                    playlistsCache = null;
                     showToast('Removed from playlist');
                     var plName = document.querySelector('#user-playlists-grid .tab-btn + span')?.textContent?.split(' · ')[0] || 'Playlist';
                     loadUserPlaylistTracks(currentPlaylistId, plName);
@@ -665,6 +695,7 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'User');
                 });
                 const data = await res.json();
                 if (data.success) {
+                    playlistsCache = null;
                     showToast('Playlist deleted');
                     loadUserPlaylists();
                 } else {

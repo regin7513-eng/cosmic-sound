@@ -1,19 +1,13 @@
 <?php
-require_once __DIR__ . '/../config/session.php';
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
+header('Cache-Control: public, max-age=3600');
 
 $artist = $_GET['artist'] ?? '';
 $track = $_GET['track'] ?? '';
 
 if (empty($artist) || empty($track)) {
     echo json_encode(['success' => false, 'message' => 'artist and track required']);
-    exit();
-}
-
-$cacheKey = 'lyrics_' . md5($artist . '|' . $track);
-if (isset($_SESSION[$cacheKey]) && (time() - ($_SESSION[$cacheKey]['time'] ?? 0)) < 3600) {
-    echo json_encode($_SESSION[$cacheKey]['data']);
     exit();
 }
 
@@ -26,10 +20,10 @@ $ch = curl_init();
 curl_setopt_array($ch, [
     CURLOPT_URL => $url,
     CURLOPT_RETURNTRANSFER => true,
-    CURLOPT_TIMEOUT => 10,
+    CURLOPT_TIMEOUT => 6,
     CURLOPT_SSL_VERIFYPEER => false,
     CURLOPT_HTTPHEADER => [
-        'User-Agent: CosmicSound/1.0'
+        'User-Agent: GinzSong/1.0'
     ]
 ]);
 $response = curl_exec($ch);
@@ -84,8 +78,6 @@ $result = [
     'album' => $best['albumName'] ?? '',
     'duration' => $best['duration'] ?? 0
 ];
-
-$_SESSION[$cacheKey] = ['data' => $result, 'time' => time()];
 
 echo json_encode($result);
 ?>

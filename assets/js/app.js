@@ -291,6 +291,7 @@ async function toggleFavorite(song) {
 
     if (wasFav) {
         favoriteIds.delete(song.id);
+        favoritesCache = null;
         try {
             var r = await fetch(API_BASE + '/favorites.php?track_id=' + encodeURIComponent(song.id), {
                 method: 'DELETE', credentials: 'same-origin'
@@ -301,6 +302,7 @@ async function toggleFavorite(song) {
         showToast('Removed from Favorites');
     } else {
         favoriteIds.add(song.id);
+        favoritesCache = null;
         try {
             var r = await fetch(API_BASE + '/favorites.php', {
                 method: 'POST',
@@ -451,6 +453,7 @@ async function addToPlaylist(playlistId, playlistName) {
         });
         const data = await res.json();
         if (data.success) {
+            playlistsCache = null;
             showToast('Added to "' + playlistName + '"');
             if (currentPlaylistId === playlistId && typeof loadUserPlaylistTracks === 'function') {
                 loadUserPlaylistTracks(playlistId, playlistName);
@@ -491,6 +494,7 @@ async function createPlaylist(e) {
         const data = await res.json();
         if (data.success && data.data) {
             closeCreatePlaylistModal();
+            playlistsCache = null;
             showToast('Playlist "' + name + '" created');
             if (contextSong) {
                 await addToPlaylist(data.data.id, name);
@@ -1195,6 +1199,16 @@ function updatePlayerUI() {
     document.getElementById('player-artist').textContent = currentSong.artist;
     document.title = currentSong.title + ' - ' + currentSong.artist + ' | Ginz Song';
     updateNowPlaying();
+    preloadLyrics(currentSong);
+}
+
+function preloadLyrics(song) {
+    var cacheKey = (song.artist || '') + '|' + (song.title || '');
+    if (lyricsCache[cacheKey]) return;
+    var url = API_BASE + '/lyrics.php?' + new URLSearchParams({ artist: song.artist || '', track: song.title || '' });
+    fetch(url).then(function(r) { return r.json(); }).then(function(data) {
+        lyricsCache[cacheKey] = data;
+    }).catch(function() {});
 }
 
 function updatePlayButton() {
@@ -1592,7 +1606,26 @@ function toggleLyrics() {
     panel.classList.toggle('show', lyricsVisible);
     btn.classList.toggle('active', lyricsVisible);
     if (lyricsVisible && currentSong) {
-        loadLyrics(currentSong);
+        var cacheKey = (currentSong.artist || '') + '|' + (currentSong.title || '');
+        if (lyricsCache[cacheKey]) {
+            var cached = lyricsCache[cacheKey];
+            if (cached.synced && Array.isArray(cached.lyrics)) {
+                lyricsData = cached.lyrics;
+                lyricsSynced = true;
+                renderSyncedLyrics();
+            } else if (typeof cached.lyrics === 'string') {
+                lyricsSynced = false;
+                document.getElementById('lyrics-content').innerHTML = '<div class="lyrics-plain">' + esc(cached.lyrics) + '</div>';
+            } else {
+                document.getElementById('lyrics-content').innerHTML = '<div class="lyrics-not-found"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><p>No lyrics available</p></div>';
+            }
+        } else {
+            document.getElementById('lyrics-content').innerHTML = '<div class="lyrics-loading"><div class="loading-spinner"></div><p>Loading lyrics...</p></div>';
+            loadLyrics(currentSong);
+        }
+        document.getElementById('lyrics-title').textContent = currentSong.title || '-';
+        document.getElementById('lyrics-artist').textContent = currentSong.artist || '-';
+        document.getElementById('lyrics-cover').src = currentSong.cover_image || '';
     }
 }
 
