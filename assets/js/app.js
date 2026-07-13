@@ -106,7 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 .then(function(data) {
                     if (!data.success && data.expired) {
                         if (currentSong && isPlaying) audio.pause();
-                        window.location.href = '/cosmic-sound/login.php';
+                        window.location.href = 'login.php';
                     } else if (data.success) {
                         loadFavoriteIds();
                     }
@@ -1436,8 +1436,11 @@ function addRecentSearch(query) {
 function clearRecentSearches() {
     recentSongs = [];
     try { localStorage.removeItem('recentSongs'); } catch {}
+    try { localStorage.removeItem('ginz_recent_searches'); } catch {}
     var recentView = document.getElementById('search-recent-view');
     if (recentView) recentView.style.display = 'none';
+    var defaultView = document.getElementById('search-default-view');
+    if (defaultView) defaultView.style.display = '';
 }
 function removeRecentSearch(query) {
     var searches = getRecentSearches().filter(function(s) { return s !== query; });

@@ -1872,6 +1872,13 @@ a:hover { text-decoration: underline; }
     .song-card-title { font-size: 0.72rem; font-weight: 600; padding: 0.35rem 0.4rem 0; }
     .song-card-artist { font-size: 0.65rem; padding: 0 0.4rem 0.35rem; }
 
+    .song-card-actions {
+        opacity: 1;
+    }
+    .playlist-card .playlist-delete-btn {
+        opacity: 1;
+    }
+
     #section-search .artist-grid {
         display: flex;
         overflow-x: auto;

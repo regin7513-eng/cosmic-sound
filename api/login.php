@@ -42,7 +42,7 @@ if (isset($result['access_token'])) {
     $_SESSION['refresh_token'] = $result['refresh_token'] ?? '';
 
     if (!empty($result['refresh_token'])) {
-        $secure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off');
+        $secure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
         setcookie('gs_refresh_token', $result['refresh_token'], [
             'expires' => time() + 604800,
             'path' => '/',
