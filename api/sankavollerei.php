@@ -56,9 +56,10 @@ if ($action === 'search' && $query) {
     if ($cached !== null) { echo json_encode($cached); exit(); }
 
     $downloadUrl = null;
+    $data = null;
 
     $apiUrl = "$BASE/download/spotify?apikey=$API_KEY&url=" . urlencode($url);
-    $data = fetchJson($apiUrl, 1);
+    $data = fetchJson($apiUrl, 0);
 
     if ($data && !empty($data['data']['download'])) {
         $downloadUrl = $data['data']['download'];
@@ -67,10 +68,7 @@ if ($action === 'search' && $query) {
     if (!$downloadUrl) {
         $trackId = extractSpotifyTrackId($url);
         if ($trackId) {
-            $fallbackUrl = 'https://cdn-spotify-247.zm.io.vn/download/' . $trackId;
-            if (verifyUrl($fallbackUrl)) {
-                $downloadUrl = $fallbackUrl;
-            }
+            $downloadUrl = 'https://cdn-spotify-247.zm.io.vn/download/' . $trackId;
         }
     }
 
@@ -80,14 +78,15 @@ if ($action === 'search' && $query) {
         exit();
     }
 
+    $sd = isset($data['data']) ? $data['data'] : [];
     $response = [
         'success'       => true,
         'download_url'  => $downloadUrl,
-        'title'         => $data['data']['title'] ?? '',
-        'artist'        => $data['data']['artis'] ?? '',
-        'duration'      => ($data['data']['durasi'] ?? 0) / 1000,
-        'cover_image'   => $data['data']['image'] ?? '',
-        'album'         => $data['data']['album'] ?? '',
+        'title'         => $sd['title'] ?? '',
+        'artist'        => $sd['artis'] ?? '',
+        'duration'      => isset($sd['durasi']) ? ($sd['durasi'] / 1000) : 0,
+        'cover_image'   => $sd['image'] ?? '',
+        'album'         => $sd['album'] ?? '',
     ];
     cacheSet($cacheKey, $response);
     echo json_encode($response);
@@ -161,24 +160,4 @@ function extractSpotifyTrackId($url) {
         return $m[1];
     }
     return null;
-}
-
-function verifyUrl($url) {
-    $ch = curl_init($url);
-    curl_setopt_array($ch, [
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_NOBODY => true,
-        CURLOPT_TIMEOUT => 8,
-        CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_SSL_VERIFYPEER => false,
-        CURLOPT_HTTPHEADER => [
-            'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
-            'Origin: https://open.spotify.com',
-        ],
-    ]);
-    curl_exec($ch);
-    $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    $type = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
-    curl_close($ch);
-    return ($code >= 200 && $code < 400 && strpos($type, 'audio') !== false);
 }
