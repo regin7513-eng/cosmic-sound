@@ -966,7 +966,6 @@ function toggleFavoriteFromCard(cardEl) {
 }
 
 var _pendingPlay = 0;
-var _silentAudio = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=';
 
 function playSongDirect() {
     if (!currentSong || (!currentSong.track_url && !currentSong.id)) {
@@ -984,8 +983,6 @@ function playSongDirect() {
     }
 
     audio.pause();
-    audio.removeAttribute('src');
-    audio.load();
 
     currentSongId++;
     _pendingPlay = currentSongId;
@@ -1003,8 +1000,6 @@ function playSongDirect() {
     if (cachedUrl) {
         playWithUrl(cachedUrl, myId);
     } else {
-        audio.src = _silentAudio;
-        audio.play().then(function() { audio.pause(); }).catch(function() {});
         fetchDownloadUrl(currentSong.track_url).then(function(downloadUrl) {
             if (myId !== currentSongId) return;
             if (downloadUrl) {
