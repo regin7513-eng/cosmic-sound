@@ -14,7 +14,7 @@ $BASE = 'https://www.sankavollerei.web.id';
 
 if ($action === 'search' && $query) {
     $cacheKey = 'search_' . $query . '_' . $limit;
-    $cached = cacheGet($cacheKey, 1800);
+    $cached = cacheGet($cacheKey, 7200);
     if ($cached !== null) { echo json_encode($cached); exit(); }
 
     $apiUrl = "$BASE/search/spotify?apikey=$API_KEY&q=" . urlencode($query);
@@ -52,7 +52,7 @@ if ($action === 'search' && $query) {
 
 } elseif ($action === 'download' && $url) {
     $cacheKey = 'download_' . md5($url);
-    $cached = cacheGet($cacheKey, 3600);
+    $cached = cacheGet($cacheKey, 86400);
     if ($cached !== null) { echo json_encode($cached); exit(); }
 
     $apiUrl = "$BASE/download/spotify?apikey=$API_KEY&url=" . urlencode($url);
