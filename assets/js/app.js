@@ -967,6 +967,21 @@ function toggleFavoriteFromCard(cardEl) {
 
 var _pendingPlay = 0;
 
+function resolveAudioUrl(song) {
+    if (typeof YT !== 'undefined' && song && song.title) {
+        return YT.fetchAudio(song).then(function(ytAudio) {
+            if (ytAudio && ytAudio.url) {
+                console.log('[AUDIO] YouTube stream:', ytAudio.title || song.title);
+                return ytAudio.url;
+            }
+            return fetchDownloadUrl(song.track_url || song.id);
+        }).catch(function() {
+            return fetchDownloadUrl(song.track_url || song.id);
+        });
+    }
+    return fetchDownloadUrl(song.track_url || song.id);
+}
+
 function playSongDirect() {
     if (!currentSong || (!currentSong.track_url && !currentSong.id)) {
         _pendingPlay = 0;
@@ -1000,11 +1015,11 @@ function playSongDirect() {
     if (cachedUrl) {
         playWithUrl(cachedUrl, myId);
     } else {
-        fetchDownloadUrl(currentSong.track_url).then(function(downloadUrl) {
+        resolveAudioUrl(currentSong).then(function(audioUrl) {
             if (myId !== currentSongId) return;
-            if (downloadUrl) {
-                urlCache[currentSong.track_url] = downloadUrl;
-                playWithUrl(downloadUrl, myId);
+            if (audioUrl) {
+                urlCache[currentSong.track_url] = audioUrl;
+                playWithUrl(audioUrl, myId);
             } else {
                 _pendingPlay = 0;
                 showToast('Unable to load track');

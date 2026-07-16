@@ -522,6 +522,7 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'User');
         </div>
     </div>
 
+    <script src="assets/js/youtube.js"></script>
     <script src="assets/js/app.js"></script>
     <script>
         function loadPlaylistTab(el, id) {
