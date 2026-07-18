@@ -32,17 +32,10 @@ function accumulateKnown(songs) {
 }
 
 function preloadUrls(songs) {
-    songs.forEach(function(song, i) {
+    songs.forEach(function(song) {
         if (song.track_url && !urlCache[song.track_url]) {
-            setTimeout(function() {
-                fetch(API_BASE + '/sankavollerei.php?action=download&url=' + encodeURIComponent(song.track_url))
-                    .then(function(r) { return r.json(); })
-                    .then(function(data) {
-                        if (data.success && data.download_url) {
-                            urlCache[song.track_url] = data.download_url;
-                        }
-                    }).catch(function() {});
-            }, i * 200);
+            var cdnUrl = extractCdnUrl(song.track_url);
+            if (cdnUrl) urlCache[song.track_url] = cdnUrl;
         }
     });
 }
@@ -967,19 +960,28 @@ function toggleFavoriteFromCard(cardEl) {
 
 var _pendingPlay = 0;
 
+function extractCdnUrl(trackUrl) {
+    if (!trackUrl) return null;
+    var m = trackUrl.match(/open\.spotify\.com\/track\/([a-zA-Z0-9]+)/);
+    if (m) return 'https://cdn-spotify-247.zm.io.vn/download/' + m[1];
+    m = trackUrl.match(/spotify:track:([a-zA-Z0-9]+)/);
+    if (m) return 'https://cdn-spotify-247.zm.io.vn/download/' + m[1];
+    return null;
+}
+
 function resolveAudioUrl(song) {
+    var trackUrl = song.track_url || song.id;
+    var cdnUrl = extractCdnUrl(trackUrl);
+    if (cdnUrl) return Promise.resolve(cdnUrl);
     if (typeof YT !== 'undefined' && song && song.title) {
         return YT.fetchAudio(song).then(function(ytAudio) {
-            if (ytAudio && ytAudio.url) {
-                console.log('[AUDIO] YouTube stream:', ytAudio.title || song.title);
-                return ytAudio.url;
-            }
-            return fetchDownloadUrl(song.track_url || song.id);
+            if (ytAudio && ytAudio.url) return ytAudio.url;
+            return fetchDownloadUrl(trackUrl);
         }).catch(function() {
-            return fetchDownloadUrl(song.track_url || song.id);
+            return fetchDownloadUrl(trackUrl);
         });
     }
-    return fetchDownloadUrl(song.track_url || song.id);
+    return fetchDownloadUrl(trackUrl);
 }
 
 function playSongDirect() {
